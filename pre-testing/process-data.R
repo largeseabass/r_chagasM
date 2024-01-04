@@ -64,16 +64,29 @@ all_saving_paths <- function(top_file_dir,this_bug){
   #path under save_all_output_path for maxent historical prediction output
   save_raster_path<- paste(maxent_result_dir,"/historical_predict_",this_bug,'.tif',sep = '')
   print(save_raster_path)
+  
   #path under save_all_output_path for maxent training and testing sets (include the ones for cross validation)
   save_input_data_path<- paste(maxent_result_dir,"/input_data_",this_bug,'.RDS',sep = '')
   print(save_input_data_path)
   
-  #path under save_all_output_path for maxent historical prediction output
+  #path under save_all_output_path for maxent future projected prediction output for SSP126 
   save_raster_path_ssp1<- paste(maxent_result_dir,"/ssp126_predict_",this_bug,'.tif',sep = '')
-  print(save_raster_path)
+  print(save_raster_path_ssp1)
+  
+  #path under save_all_output_path for maxent future projected prediction output for SSP245
+  save_raster_path_ssp2<- paste(maxent_result_dir,"/ssp245_predict_",this_bug,'.tif',sep = '')
+  print(save_raster_path_ssp2)
+  
+  #path under save_all_output_path for maxent future projected prediction output for SSP370 
+  save_raster_path_ssp3<- paste(maxent_result_dir,"/ssp370_predict_",this_bug,'.tif',sep = '')
+  print(save_raster_path_ssp3)
+  
+  #path under save_all_output_path for maxent future projected prediction output for SSP585
+  save_raster_path_ssp5<- paste(maxent_result_dir,"/ssp585_predict_",this_bug,'.tif',sep = '')
+  print(save_raster_path_ssp5)
 
   
-  return(list("maxent_result_dir"=maxent_result_dir, "maxent_model_dir"=maxent_model_dir,"maxent_model_path"=maxent_model_path, "save_raster_path"=save_raster_path, "save_input_data_path"=save_input_data_path))
+  return(list("maxent_result_dir"=maxent_result_dir, "maxent_model_dir"=maxent_model_dir,"maxent_model_path"=maxent_model_path, "save_raster_path"=save_raster_path, "save_input_data_path"=save_input_data_path,"save_raster_path_ssp1"=save_raster_path_ssp1,"save_raster_path_ssp2"=save_raster_path_ssp2,"save_raster_path_ssp3"=save_raster_path_ssp3, "save_raster_path_ssp5"=save_raster_path_ssp5))
 }
 
 

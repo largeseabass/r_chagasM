@@ -9,6 +9,7 @@
 - maxent_evaluate_dir: top_file_dir/this_bug/evaluate/
 - maxent_result_dir: top_file_dir/this_bug/results/
 - maxent_model_dir: top_file_dir/this_bug/results/model/
+- maxent_raster_dir: top_file_dir/this_bug/results/output_raster/
 
 save the final model (from which we generate prediction). The models used in cross-validation are not saved.
 - maxent_model_path: top_file_dir/this_bug/results/model/thisbug.RDS

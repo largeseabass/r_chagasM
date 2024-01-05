@@ -13,12 +13,12 @@
 
 save the final model (from which we generate prediction). The models used in cross-validation are not saved.
 - maxent_model_path: top_file_dir/this_bug/results/model/thisbug.RDS
-- save_raster_path: top_file_dir/this_bug/results/historical_predict_this_bug.tif
 - save_input_data_path: top_file_dir/this_bug/results/input_data_this_bug.RDS
-- save_raster_path_ssp1: top_file_dir/this_bug/results/ssp126_predict_this_bug.tif
-- save_raster_path_ssp2: top_file_dir/this_bug/results/ssp245_predict_this_bug.tif
-- save_raster_path_ssp3: top_file_dir/this_bug/results/ssp370_predict_this_bug.tif
-- save_raster_path_ssp5: top_file_dir/this_bug/results/ssp585_predict_this_bug.tif
+- save_raster_path:  top_file_dir/this_bug/results/output_raster/historical_predict_this_bug.tif
+- save_raster_path_ssp1: top_file_dir/this_bug/results/output_raster/ssp126_predict_this_bug.tif
+- save_raster_path_ssp2: top_file_dir/this_bug/results/output_raster/ssp245_predict_this_bug.tif
+- save_raster_path_ssp3: top_file_dir/this_bug/results/output_raster/ssp370_predict_this_bug.tif
+- save_raster_path_ssp5: top_file_dir/this_bug/results/output_raster/ssp585_predict_this_bug.tif
 
 - maxent evaluation results (cross validation, i indicates the number of run): top_file_dir/this_bug/evaluate/i
 - maxent evaluation results (for the final model used in prediction): top_file_dir/this_bug/evaluate/final

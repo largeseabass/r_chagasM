@@ -6,10 +6,8 @@
 
 - save_all_output_dir: top_file_dir/this_bug/
 
-
+- maxent_evaluate_dir: top_file_dir/this_bug/evaluate/
 - maxent_result_dir: top_file_dir/this_bug/results/
-
-
 - maxent_model_dir: top_file_dir/this_bug/results/model/
 
 save the final model (from which we generate prediction). The models used in cross-validation are not saved.
@@ -21,6 +19,8 @@ save the final model (from which we generate prediction). The models used in cro
 - save_raster_path_ssp3: top_file_dir/this_bug/results/ssp370_predict_this_bug.tif
 - save_raster_path_ssp5: top_file_dir/this_bug/results/ssp585_predict_this_bug.tif
 
+- maxent evaluation results (cross validation, i indicates the number of run): top_file_dir/this_bug/evaluate/i
+- maxent evaluation results (for the final model used in prediction): top_file_dir/this_bug/evaluate/final
 
 ## list of functions
 

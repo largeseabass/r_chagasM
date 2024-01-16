@@ -8,14 +8,87 @@ library("knitr")
 library("rprojroot")
 library("caret")
 library("Metrics")
-options(java.parameters = "-Xmx8000m")
-
-source("/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/pre-testing/process-data.R")
-
 
 ###
 #for grid input
 ###
+
+
+all_saving_paths <- function(top_file_dir,this_bug){
+  ###########
+  # example all_saving_paths("/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/output/","San")
+  # top_file_dir: the directory to save all the output files
+  # this_bug: specify which bug we are interested at, choose from: Dim, Ger, Ind, Lec, Lon, Max, Mex, Neo, Pro, Rec, Rub, San
+  # return: a stack specify all the paths to save output files under top_file_dir
+  ###########
+  
+  #subfolder for saving all the output (for all bugs), sanity check
+  print(1)
+  print(top_file_dir)
+  if (!dir.exists(top_file_dir)){
+    dir.create(top_file_dir)
+  }else{
+    print("dir exists")
+  }
+  
+  #save all the output top_file_path/bug/
+  save_all_output_dir <- paste(top_file_dir,"/",this_bug,sep = '')
+  print(2)
+  print(save_all_output_dir)
+  if (!dir.exists(save_all_output_dir)){
+    dir.create(save_all_output_dir)
+  }else{
+    print("dir exists")
+  }
+  
+  
+  
+  #subfolder under save_all_output_path/result/ for maxent output
+  maxent_result_dir <- paste(save_all_output_dir,'/result',sep = '')
+  print(3)
+  print(maxent_result_dir)
+  if (!dir.exists(maxent_result_dir)){
+    dir.create(maxent_result_dir)
+  }else{
+    print("dir exists")
+  }
+  
+  #subfolder under save_all_output_path/result/ for maxent output
+  maxent_evaluate_dir <- paste(save_all_output_dir,'/evaluate',sep = '')
+  print(4)
+  print(maxent_evaluate_dir)
+  if (!dir.exists(maxent_evaluate_dir)){
+    dir.create(maxent_evaluate_dir)
+  }else{
+    print("dir exists")
+  }
+  
+  
+  #subfolder under save_all_output_path/model/ for maxent model
+  maxent_model_dir <- paste(maxent_result_dir,"/model",sep = '')
+  print(5)
+  print(maxent_model_dir)
+  if (!dir.exists(maxent_model_dir)){
+    dir.create(maxent_model_dir)
+  }else{
+    print("dir exists")
+  }
+  
+  #subfolder under save_all_output_path/output_raster/ for maxent model
+  maxent_raster_dir <- paste(maxent_result_dir,"/output_raster",sep = '')
+  print(6)
+  print(maxent_raster_dir)
+  if (!dir.exists(maxent_raster_dir)){
+    dir.create(maxent_raster_dir)
+  }else{
+    print("dir exists")
+  }
+  
+  
+  list_to_return <- list("maxent_result_dir"=maxent_result_dir, "maxent_evaluate_dir"=maxent_evaluate_dir,"maxent_model_dir"=maxent_model_dir,"maxent_raster_dir"=maxent_raster_dir )
+  return(list_to_return)
+}
+
 prepare_input_data_kfold_grid <- function(occ_grid_path,clim_grid_path,number_of_folds,maxent_result_dir){
   # input:
   # occ_raw_path: the path of the occurence data (in .csv format, with decimal longitude and latitude columns have column names 'DecimalLon',"DecimalLat")
@@ -736,12 +809,12 @@ run_maxent_model_prediction_list_grid_old <- function(mod_list,grid_path_list,di
 }
 
 
-run_maxent_model_prediction_basic_grid <- function(mod,grid_path_list,dir_sub_name,maxent_raster_dir){
+run_maxent_model_prediction_basic_grid <- function(mod_list,grid_path_list,dir_sub_name,maxent_raster_dir){
   # take one trained maxent model
   # perform prediction on historical and future projected 2071-2100 ssp1, ssp2, ssp3, ssp5 rasters (after aligned)
   # save the results as .tif files
   cat("\nbasic prediction")
-  
+  mod <- readRDS(mod_path)
   maxent_raster_dir_this <- paste(maxent_raster_dir,'/',dir_sub_name,sep = '')
   print(maxent_raster_dir_this)
   if (!dir.exists(maxent_raster_dir_this)){
@@ -754,78 +827,57 @@ run_maxent_model_prediction_basic_grid <- function(mod,grid_path_list,dir_sub_na
   # historical prediction                #
   ########################################
   #  
-  startTime <- Sys.time()
+
   run_maxent_model_prediction_single(mod=mod,
                                      this_item_name=paste("historical_predict","_allinput",sep = ''),
                                      grid_path_list_this = grid_path_list$historical_all,
                                      maxent_raster_dir_this=maxent_raster_dir_this,
                                      historical=T)
 
-  print("historical_clim")
-  
-  endTime <- Sys.time()
-  print(endTime-startTime)
   ########################################
   # predictions for the future   SSP1    #
   ########################################
-  startTime <- Sys.time()
   run_maxent_model_prediction_single(mod=mod,
                                      this_item_name=paste("ssp126","_allinput",sep = ''),
                                      grid_path_list_this = c(grid_path_list$ssp1_lc,grid_path_list$ssp1_bc),
                                      maxent_raster_dir_this=maxent_raster_dir_this,
                                      historical=F)
-  
-  print("ssp1")
-  endTime <- Sys.time()
-  print(endTime-startTime)
+
   
   ########################################
   # predictions for the future   SSP2    #
   ########################################
-  
-  startTime <- Sys.time()
   run_maxent_model_prediction_single(mod=mod,
                                      this_item_name=paste("ssp245","_allinput",sep = ''),
                                      grid_path_list_this = c(grid_path_list$ssp2_lc,grid_path_list$ssp2_bc),
                                      maxent_raster_dir_this=maxent_raster_dir_this,
                                      historical=F)
-  
-  print("ssp2")
-  endTime <- Sys.time()
-  print(endTime-startTime)
-  
+
   ########################################
   # predictions for the future   SSP3    #
   ########################################
-  
-  startTime <- Sys.time()
+
   run_maxent_model_prediction_single(mod=mod,
                                      this_item_name=paste("ssp370","_allinput",sep = ''),
                                      grid_path_list_this = c(grid_path_list$ssp3_lc,grid_path_list$ssp3_bc),
                                      maxent_raster_dir_this=maxent_raster_dir_this,
                                      historical=F)
-  
-  print("ssp3")
-  endTime <- Sys.time()
-  print(endTime-startTime)
+
   
   ########################################
   # predictions for the future   SSP5    #
   ########################################
-  
-  startTime <- Sys.time()
+
   run_maxent_model_prediction_single(mod=mod,
                                      this_item_name=paste("ssp585","_allinput",sep = ''),
                                      grid_path_list_this = c(grid_path_list$ssp5_lc,grid_path_list$ssp5_bc),
                                      maxent_raster_dir_this=maxent_raster_dir_this,
                                      historical=F)
-  print("ssp5")
-  endTime <- Sys.time()
-  print(endTime-startTime)
+
 }
 
 
-run_maxent_model_prediction_list_grid <- function(mod_list,grid_path_list,dir_sub_name,number_replicate,maxent_raster_dir){
+run_maxent_model_prediction_list_grid <- function(mod_list_path,grid_path_list,dir_sub_name,number_replicate,maxent_raster_dir){
   # take a list of trained maxent models
   # perform prediction on historical and future projected 2071-2100 ssp1, ssp2, ssp3, ssp5 rasters (after aligned)
   # save the results as .tif files
@@ -836,7 +888,134 @@ run_maxent_model_prediction_list_grid <- function(mod_list,grid_path_list,dir_su
   
   cat("\nmodel-list prediction")
   startTime <- Sys.time()
+  mod_list <- readRDS(mod_list_path)
+  maxent_raster_dir_this <- paste(maxent_raster_dir,'/',dir_sub_name,sep = '')
+  print(maxent_raster_dir_this)
+  if (!dir.exists(maxent_raster_dir_this)){
+    dir.create(maxent_raster_dir_this)
+  }else{
+    print("dir exists")
+  }
+  for (i in 1:number_replicate){
+    cat("\n",i)
+    mod <- mod_list[[i]]
+    ########################################
+    # historical prediction                #
+    ########################################
+    #  
+    startTime <- Sys.time()
+    run_maxent_model_prediction_single(mod=mod,
+                                       this_item_name=paste("historical_predict",i,sep = ''),
+                                       grid_path_list_this = grid_path_list$historical_all,
+                                       maxent_raster_dir_this=maxent_raster_dir_this,
+                                       historical=T)
+    
+    print("historical_clim")
+    
+    endTime <- Sys.time()
+    print(endTime-startTime)
+    ########################################
+    # predictions for the future   SSP1    #
+    ########################################
+    startTime <- Sys.time()
+    run_maxent_model_prediction_single(mod=mod,
+                                       this_item_name=paste("ssp126",i,sep = ''),
+                                       grid_path_list_this = c(grid_path_list$ssp1_lc,grid_path_list$ssp1_bc),
+                                       maxent_raster_dir_this=maxent_raster_dir_this,
+                                       historical=F)
+    
+    print("ssp1")
+    endTime <- Sys.time()
+    print(endTime-startTime)
+    
+    ########################################
+    # predictions for the future   SSP2    #
+    ########################################
+    
+    startTime <- Sys.time()
+    run_maxent_model_prediction_single(mod=mod,
+                                       this_item_name=paste("ssp245",i,sep = ''),
+                                       grid_path_list_this = c(grid_path_list$ssp2_lc,grid_path_list$ssp2_bc),
+                                       maxent_raster_dir_this=maxent_raster_dir_this,
+                                       historical=F)
+    
+    print("ssp2")
+    endTime <- Sys.time()
+    print(endTime-startTime)
+    
+    ########################################
+    # predictions for the future   SSP3    #
+    ########################################
+    
+    startTime <- Sys.time()
+    run_maxent_model_prediction_single(mod=mod,
+                                       this_item_name=paste("ssp370",i,sep = ''),
+                                       grid_path_list_this = c(grid_path_list$ssp3_lc,grid_path_list$ssp3_bc),
+                                       maxent_raster_dir_this=maxent_raster_dir_this,
+                                       historical=F)
+    
+    print("ssp3")
+    endTime <- Sys.time()
+    print(endTime-startTime)
+    
+    ########################################
+    # predictions for the future   SSP5    #
+    ########################################
+    
+    startTime <- Sys.time()
+    run_maxent_model_prediction_single(mod=mod,
+                                       this_item_name=paste("ssp585",i,sep = ''),
+                                       grid_path_list_this = c(grid_path_list$ssp5_lc,grid_path_list$ssp5_bc),
+                                       maxent_raster_dir_this=maxent_raster_dir_this,
+                                       historical=F)
+    print("ssp5")
+    endTime <- Sys.time()
+    print(endTime-startTime)
+  }
+  endTime <- Sys.time()
+  print(endTime-startTime)
+}
 
+
+run_maxent_model_prediction_single_save_memory <- function(mod,this_item_name,grid_path_list_this,maxent_raster_dir_this,historical=F){
+  startTime <- Sys.time()
+  print(this_item_name)
+  
+  if(historical){
+    this_grid <- read.csv(grid_path_list_this)
+    this_all_area_grid <- subset(this_grid[complete.cases(this_grid), ],select = -c(left, top,right,bottom,X,forest_grassland))
+  }else{
+    clim_list1_1 <- subset(read.csv(grid_path_list_this[[1]]),select = -c(left, top,right,bottom))
+    clim_list1_2 <- subset(read.csv(grid_path_list_this[[2]]),select = -c(left, top,right,bottom))
+    this_all_area_grid <- merge(x = clim_list1_1, y = clim_list1_2, by = "id")
+  }
+  this_all_area_values <- this_all_area_grid[complete.cases(this_all_area_grid), ]
+  this_cell_id <-  this_all_area_values$id
+  this_all_area_grid_no_id <- subset(this_all_area_values,select = -c(id))
+  print("make prediction")
+  ped <- predict(mod,this_all_area_grid_no_id)
+  # save csv file
+  final_prediction <- as.data.frame(list(id = this_cell_id,
+                                         prediction = ped))
+  
+  save_csv_path <- paste(maxent_raster_dir_this,"/",this_item_name,'_',this_bug,'.csv',sep = '')
+  write.csv(final_prediction, file = save_csv_path)
+  endTime <- Sys.time()
+  print(endTime-startTime)
+}
+
+run_maxent_model_prediction_list_grid_save_memory <- function(mod_list_path,grid_path_list,dir_sub_name,number_replicate,maxent_raster_dir){
+  # take a list of trained maxent models
+  # perform prediction on historical and future projected 2071-2100 ssp1, ssp2, ssp3, ssp5 rasters (after aligned)
+  # save the results as .tif files
+  
+  # mod_list: list of trained maxent models
+  # clim: historical bioclimatic rasters (aligned)
+  # maxent_raster_dir: the directory under which the bioclimatic rasters (aligned) are stored, with rasters for ssp1 - ssp5 stored under corresponding subfolders.
+  
+  cat("\nmodel-list prediction")
+  startTime <- Sys.time()
+  mod_list <- readRDS(mod_list_path)
   maxent_raster_dir_this <- paste(maxent_raster_dir,'/',dir_sub_name,sep = '')
   print(maxent_raster_dir_this)
   if (!dir.exists(maxent_raster_dir_this)){
@@ -1014,9 +1193,11 @@ run_maxent_kfold_cv_grid <- function(this_bug,number_replicate,top_file_dir,occ_
 
 this_bug = 'San'
 number_replicate = 10
-top_file_dir = "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/output/kfold_grid"
+top_file_dir = "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/output/kfold_grid_buffer"
 occ_grid_path = "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/cell/San.csv"
 clim_grid_path = "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/historical/5km.csv"
+buffer_grid_path = "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/buffer/San.csv"
+
 #lc land cover, bc bioclimatic
 grid_path_list <- list("historical_all"="/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/historical/5km.csv",
                        "ssp1_lc"="/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/ssp1/global_SSP1_RCP26_2085/5km.csv",
@@ -1038,11 +1219,15 @@ all_path_stack <- all_saving_paths(top_file_dir=top_file_dir,this_bug=this_bug)
 #       prepare the data.              #
 ########################################
 
-input_data_stack_with_folds <- prepare_input_data_kfold_grid(occ_grid_path=occ_grid_path,
-                                                             clim_grid_path=clim_grid_path,
-                                                             number_of_folds=number_replicate,
-                                                             maxent_result_dir=all_path_stack$maxent_result_dir)
-
+# this_input_data_stack <- prepare_input_data_kfold_grid(occ_grid_path=occ_grid_path,
+#                                                                clim_grid_path=clim_grid_path,
+#                                                                number_of_folds=number_replicate,
+#                                                                maxent_result_dir=all_path_stack$maxent_result_dir)
+this_input_data_stack <- prepare_input_data_kfold_buffer_grid(occ_grid_path=occ_grid_path,
+                                                              clim_grid_path=clim_grid_path,
+                                                              buffer_grid_path=buffer_grid_path,
+                                                              number_of_folds=number_replicate,
+                                                              maxent_result_dir=all_path_stack$maxent_result_dir)
 ########################################
 # run MaxEnt                           #
 ########################################
@@ -1050,12 +1235,11 @@ input_data_stack_with_folds <- prepare_input_data_kfold_grid(occ_grid_path=occ_g
 knitr::opts_knit$set(root.dir = '/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM')
 opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=TRUE)
 
-utils::download.file(url = "https://raw.githubusercontent.com/mrmaxent/Maxent/master/ArchivedReleases/3.4.3/maxent.jar", 
-                     destfile = paste0(system.file("java", package = "dismo"), 
+utils::download.file(url = "https://raw.githubusercontent.com/mrmaxent/Maxent/master/ArchivedReleases/3.4.3/maxent.jar",
+                     destfile = paste0(system.file("java", package = "dismo"),
                                        "/maxent.jar"), mode = "wb")  ## wb for binary file, otherwise maxent.jar can not execute
 
 # perform cross-validation
-this_input_data_stack <- input_data_stack_with_folds
 cv_result_list <- run_maxent_model_cv_grid(list_x_train_full=this_input_data_stack$list_x_train_full,
                                            list_x_test_full=this_input_data_stack$list_x_test_full,
                                            list_pa_train=this_input_data_stack$list_pa_train,
@@ -1085,15 +1269,18 @@ this_model <- run_maxent_model_training_all_grid(maxent_evaluate_dir=all_path_st
 ########################################
 # predictions              #
 ########################################
+rm(this_input_data_stack)
+cv_result_list_path <- "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/output/kfold_grid_buffer/San/evaluate/cv_models.RDS"
+this_model_path <- "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/output/kfold_grid_buffer/result/model/kfold_buffer_all_input_final_model_training_all.RDS"
 
 # perform predictions on all the cv models
-run_maxent_model_prediction_list_grid(mod_list=cv_result_list$model_list,
+run_maxent_model_prediction_list_grid(mod_list_path=cv_result_list_path,
                                      grid_path_list=grid_path_list,
                                      dir_sub_name='cross_validation',
                                      number_replicate=number_replicate,
                                      maxent_raster_dir=all_path_stack$maxent_raster_dir)
 # perform predictions on the model trained with all input data
-run_maxent_model_prediction_basic_grid(mod=this_model,
+run_maxent_model_prediction_basic_grid(mod_path=this_model_path,
                                        grid_path_list=grid_path_list,
                                        dir_sub_name="kfold_all_input",
                                        maxent_raster_dir=all_path_stack$maxent_raster_dir)

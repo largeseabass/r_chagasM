@@ -83,7 +83,7 @@ all_saving_paths <- function(top_file_dir,this_bug){
   return(list_to_return)
 }
 
-prepare_input_data_basic <- function(occ_raw_path,clim,maxent_result_dir,split_ratio=0.90){
+prepare_input_data_basic_old <- function(occ_raw_path,clim,maxent_result_dir,split_ratio=0.90){
   # input:
   # occ_raw_path: the path of the occurence data (in .csv format, with decimal longitude and latitude columns have column names 'DecimalLon',"DecimalLat")
   # clim: the stack of all input training raster data (after reprojection and alignment)
@@ -210,7 +210,141 @@ prepare_input_data_basic <- function(occ_raw_path,clim,maxent_result_dir,split_r
   return(list_to_return)
 }
 
-prepare_input_data_kfold_old <- function(occ_raw_path,clim,number_of_folds,maxent_result_dir){
+prepare_input_data_basic <- function(occ_raw_path,clim_dir,maxent_result_dir,split_ratio=0.90){
+  # input:
+  # occ_raw_path: the path of the occurence data (in .csv format, with decimal longitude and latitude columns have column names 'DecimalLon',"DecimalLat")
+  # clim: the stack of all input training raster data (after reprojection and alignment)
+  # split_ratio: percentage of training data, e.g. 0.75
+  #
+  # return:  
+  # list of items (note: pa_train and pa_test has the same order of rows as x_train and x_test)
+  # "pa_train"  list of 0 and 1, 0 indicates absence, 1 indicates presence, for training points
+  # "pa_test"  list of 0 and 1, 0 indicates absence, 1 indicates presence, for testing points
+  # "x_train"  data frame with all the variable sampling for the training points (presence + absence)
+  # "x_test"  data frame with all the variable sampling for the testing points (presence + absence)
+  # "x_train_full"  data frame with all the variable sampling for the training points (presence + absence) and coordinates
+  # "x_test_full"  data frame with all the variable sampling for the testing points (presence + absence) and coordinates
+  # "a_train" data frame with all the variable sampling for the absence training points and coordinates
+  # "a_test" data frame with all the variable sampling for the absence testing points and coordinates
+  # "p_train" data frame with all the variable sampling for the presence training points and coordinates
+  # "p_test" data frame with all the variable sampling for the presence testing points and coordinates
+  cat("\nprepare input data")
+  startTime <- Sys.time()
+  
+  #### read clim
+  clim_list <- list.files(clim_dir, pattern = '.tif$', full.names = T)  # '..' leads to the path above the folder where the .rmd file is located
+  clim <- raster::stack(clim_list)
+  
+  
+  ########################################
+  # read kissing bug presence points     #
+  ########################################
+  
+  #read occurence data and make it a spatial object
+  occ_raw <- read.csv(occ_raw_path)
+  
+  occ_only<- occ_raw[,c('DecimalLon',"DecimalLat")]
+  colnames(occ_only) <- c('longitudes',"latitudes")
+  coordinates(occ_only) <- ~longitudes + latitudes
+  
+  #plot(clim[[1]])  # to the first layer of the bioclim layers as a reference
+  #plot(occ_only, add = TRUE) 
+  
+  proj4string(occ_only)<- CRS("+proj=longlat +datum=WGS84 +no_defs") #this CRS is consistent with that of the generated background points
+  
+  
+  ########################################
+  # sample the background points         #
+  ########################################
+  occ_final <- occ_only
+  
+  studyArea <- clim
+  
+  set.seed(1) 
+  bg <- sampleRandom(x=studyArea,
+                     size=10000,
+                     na.rm=T, #removes the 'Not Applicable' points  
+                     sp=T) # return spatial points 
+  
+  
+  #plot(studyArea[[1]])
+  #plot(bg,add=T) 
+  #plot(occ_final,add=T,col="red")
+  set.seed(1)
+  
+  ########################################
+  # training & testing sets              #
+  ########################################
+  # extracting env conditions for all occurrence points
+  all_p <- as.data.frame(extract(clim, occ_only,sp = T))
+  # extracting env conditions for all background points
+  all_a <- as.data.frame(bg)
+  names(all_a)[names(all_a) == "x"] <- "longitudes"
+  names(all_a)[names(all_a) == "y"] <- "latitudes"
+  # remove all the rows with NA value, print warning 
+  this_inspect_index_p <- unique(which(is.na(all_p), arr.ind=TRUE)[,1])
+  if(length(this_inspect_index_p) > 0){
+    cat("\nNA values in occurrence points!")
+    cat("\nRows with NA values are removed. Row indexs:",this_inspect_index_p)
+    cat("\nRows with NA values are removed. Rows:")
+    print(all_p[this_inspect_index_p,])
+    all_p <- all_p[-this_inspect_index_p,]
+    cat("\nPlease consider removing these rows from input datasets.")
+  } 
+  
+  bg <- as.data.frame(bg)
+  this_inspect_index_bg <- unique(which(is.na(as.data.frame(bg)), arr.ind=TRUE)[,1])
+  if(length(this_inspect_index_bg) > 0){
+    cat("\nNA values in background points!")
+    cat("\nRows with NA values are removed. Row indexs:",this_inspect_index_bg)
+    cat("\nRows with NA values are removed. Rows:")
+    print(bg[this_inspect_index_bg,])
+    bg <- bg[-this_inspect_index_bg,]
+    cat("\nPlease double check input raster layers.")
+  } 
+  
+  
+  this_inspect_index_bg <- unique(which(is.na(as.data.frame(all_a)), arr.ind=TRUE)[,1])
+  if(length(this_inspect_index_bg) > 0){
+    cat("\nNA values in background points!")
+    cat("\nRows with NA values are removed. Row indexs:",this_inspect_index_bg)
+    cat("\nRows with NA values are removed. Rows:")
+    print(all_a[this_inspect_index_bg,])
+    all_a <- all_a[-this_inspect_index_bg,]
+    cat("\nPlease double check input raster layers.")
+  } 
+  
+  # randomly select 75% for training
+  selected <- sample(1:length(all_p), length(all_p) * split_ratio)
+  p_train <- all_p[selected, ]  # this is the selection to be used for model training
+  p_test <- all_p[-selected, ]  # this is the opposite of the selection which will be used for model testing
+  
+  # extracting env conditions for background
+  bg_selected <-  sample(1:length(bg), length(bg) * split_ratio)
+  a_train <- bg[bg_selected,]
+  a_test <- bg[-bg_selected,]
+  # To create final training set: 
+  # (presence) repeat the number 1 as many numbers as the number of rows in p
+  # (absence) repeat 0 as the rows of background points
+  pa_train <- c(rep(1, nrow(p_train)), rep(0, nrow(a_train)))
+  pa_test <- c(rep(1, nrow(p_test)), rep(0, nrow(a_test)))
+  
+  
+  # To create training and testing set, with (_full) and without decimal longitudes and latitudes.
+  x_train_full <- as.data.frame(rbind(p_train, a_train))
+  x_test_full <- as.data.frame(rbind(p_test, a_test))
+  
+  x_train <- subset(x_train_full,select = -c(longitudes, latitudes))
+  x_test <- subset(x_test_full,select = -c(longitudes, latitudes))
+  list_to_return <- list("pa_train" =pa_train, "pa_test"=pa_test, "x_train"=x_train,"x_test"=x_test,"x_train_full"=x_train_full,"x_test_full"=x_test_full,"a_train"=a_train,"a_test"=a_test,"p_train"=p_train,"p_test"=p_test)
+  saveRDS(list_to_return, file = paste(maxent_result_dir,"/basic_input_data_",this_bug,".RDS",sep = ''))
+  endTime <- Sys.time()
+  print(endTime-startTime)
+  return(list_to_return)
+}
+
+
+prepare_input_data_kfold_old1 <- function(occ_raw_path,clim,number_of_folds,maxent_result_dir){
   # input:
   # occ_raw_path: the path of the occurence data (in .csv format, with decimal longitude and latitude columns have column names 'DecimalLon',"DecimalLat")
   # clim: the stack of all input training raster data (after reprojection and alignment)
@@ -357,7 +491,7 @@ prepare_input_data_kfold_old <- function(occ_raw_path,clim,number_of_folds,maxen
   return(list_to_return)
 }
 
-prepare_input_data_kfold <- function(occ_raw_path,clim,number_of_folds,maxent_result_dir){
+prepare_input_data_kfold_old2 <- function(occ_raw_path,clim,number_of_folds,maxent_result_dir){
   # input:
   # occ_raw_path: the path of the occurence data (in .csv format, with decimal longitude and latitude columns have column names 'DecimalLon',"DecimalLat")
   # clim: the stack of all input training raster data (after reprojection and alignment)
@@ -503,7 +637,159 @@ prepare_input_data_kfold <- function(occ_raw_path,clim,number_of_folds,maxent_re
   return(list_to_return)
 }
 
-prepare_input_data_kfold_buffer_old <- function(occ_raw_path,clim,number_of_folds,shapefile_path,maxent_result_dir,buff_width = 55555){
+prepare_input_data_kfold <- function(occ_raw_path,clim_dir,number_of_folds,maxent_result_dir){
+  # input:
+  # occ_raw_path: the path of the occurence data (in .csv format, with decimal longitude and latitude columns have column names 'DecimalLon',"DecimalLat")
+  # clim: the stack of all input training raster data (after reprojection and alignment)
+  # number_of_folds: specify the number of folds to split the data (for k-fold cross validation)
+  # split_ratio=0.75: percentage of input data to put into the training set
+  #
+  # idea of this function:
+  # split the input data into training-testing sets
+  # for the training set, further create #(number_of_folds) dataframes and lists for cross validation
+  # 
+  # return:  
+  # list of items (note: pa_train and pa_test has the same order of rows as x_train and x_test)
+  # "list_pa_train" list of lists of 0 and 1, 0 indicates absence, 1 indicates presence, for training points
+  # "list_pa_test"  list of lists of 0 and 1, 0 indicates absence, 1 indicates presence, for testing points
+  # "list_x_train_full"  list of data frames with all the variable sampling for the training points (presence + absence) and coordinates
+  # "list_x_test_full"  list of data frames with all the variable sampling for the testing points (presence + absence) and coordinates
+  # "list_a_train" list of data frames with all the variable sampling for the absence training points and coordinates
+  # "list_a_test" list of data frames with all the variable sampling for the absence testing points and coordinates
+  # "list_p_train" list of data frames with all the variable sampling for the presence training points and coordinates
+  # "list_p_test" list of data frames with all the variable sampling for the presence testing points and coordinates
+  
+  # "all_pa"  list of 0 and 1, 0 indicates absence, 1 indicates presence, for all input points
+  # "all_x_full"  data frame with all the variable sampling for the all input points (presence + absence) and coordinates
+  # "all_a" data frame with all the variable sampling for all the absence points and coordinates
+  # "all_p" data frame with all the variable sampling for all the presence points and coordinates
+  
+  
+  cat("\nprepare input data...number of replicates: ",number_of_folds)
+  startTime <- Sys.time()
+  
+  #### read clim
+  clim_list <- list.files(clim_dir, pattern = '.tif$', full.names = T)  # '..' leads to the path above the folder where the .rmd file is located
+  clim <- raster::stack(clim_list)
+  
+  ########################################
+  # read kissing bug presence points     #
+  ########################################
+  
+  #read occurence data
+  occ_raw <- read.csv(occ_raw_path)
+  
+  occ_only<- occ_raw[,c('DecimalLon',"DecimalLat")]
+  colnames(occ_only) <- c('longitudes',"latitudes")
+  coordinates(occ_only) <- ~longitudes + latitudes
+  
+  proj4string(occ_only)<- CRS("+proj=longlat +datum=WGS84 +no_defs")#CRS("+init=epsg:4326")
+  
+  
+  ########################################
+  # sample the background points         #
+  ########################################
+  
+  occ_final <- occ_only
+  
+  studyArea <- clim
+  
+  set.seed(1) 
+  cat('\nselect background points')
+  bg <- sampleRandom(x=studyArea,
+                     size=10000,
+                     sp=T) # return spatial points
+  
+  set.seed(1)
+  
+  
+  ########################################
+  # all input data                     #
+  ########################################
+  # extracting env conditions for all occurrence points
+  all_p <- as.data.frame(extract(clim, occ_only,sp = T))
+  # extracting env conditions for all background points
+  all_a <- as.data.frame(bg)
+  names(all_a)[names(all_a) == "x"] <- "longitudes"
+  names(all_a)[names(all_a) == "y"] <- "latitudes"
+  # remove all the rows with NA value, print warning 
+  this_inspect_index_p <- unique(which(is.na(all_p), arr.ind=TRUE)[,1])
+  if(length(this_inspect_index_p) > 0){
+    cat("\nNA values in occurrence points!")
+    cat("\nRows with NA values are removed. Row indexs:",this_inspect_index_p)
+    cat("\nRows with NA values are removed. Rows:")
+    print(all_p[this_inspect_index_p,])
+    all_p <- all_p[-this_inspect_index_p,]
+    cat("\nPlease consider removing these rows from input datasets.")
+  } 
+  
+  this_inspect_index_bg <- unique(which(is.na(as.data.frame(all_a)), arr.ind=TRUE)[,1])
+  if(length(this_inspect_index_bg) > 0){
+    cat("\nNA values in background points!")
+    cat("\nRows with NA values are removed. Row indexs:",this_inspect_index_bg)
+    cat("\nRows with NA values are removed. Rows:")
+    print(all_a[this_inspect_index_bg,])
+    all_a <- all_a[-this_inspect_index_bg,]
+    cat("\nPlease double check input raster layers.")
+  } 
+  
+  
+  # prepare data for training
+  all_pa <- c(rep(1, nrow(all_p)), rep(0, nrow(all_a)))
+  all_x_full <- as.data.frame(rbind(all_p, all_a))
+  ########################################
+  # k-fold p and a.                      #
+  ########################################
+  # list[number_of_folds] of index to be hold out for each fold
+  occ_only_dataframe <- as.data.frame(all_p)
+  bg_dataframe <- as.data.frame(all_a)
+  
+  
+  
+  occ_kfold <- createFolds(occ_only_dataframe[[1]],k=number_of_folds) 
+  bg_kfold <- createFolds(bg_dataframe[[1]],k=number_of_folds) 
+  
+  
+  list_pa_train <- c()
+  list_pa_test <- c()
+  list_x_train_full <- c()
+  list_x_test_full <- c()
+  list_p_train <- c()
+  list_a_train <- c()
+  list_p_test <- c()
+  list_a_test <- c()
+  for (i in 1:number_of_folds){
+    cat("\n",i)
+    p_train <- occ_only_dataframe[-occ_kfold[[i]], ]  # this is the selection to be used for model training
+    p_test <- occ_only_dataframe[occ_kfold[[i]], ]  # this is the opposite of the selection which will be used for model testing
+    
+    a_train <- bg_dataframe[-bg_kfold[[i]],]
+    a_test <- bg_dataframe[bg_kfold[[i]],]
+    
+    pa_train <- c(rep(1, nrow(p_train)), rep(0, nrow(a_train)))
+    pa_test <- c(rep(1, nrow(p_test)), rep(0, nrow(a_test)))
+    x_train_full <- as.data.frame(rbind(p_train, a_train))
+    x_test_full <- as.data.frame(rbind(p_test, a_test))
+    
+    list_pa_train <- c(list_pa_train,list(pa_train))
+    list_pa_test <- c(list_pa_test,list(pa_test))
+    list_x_train_full <- c(list_x_train_full,list(x_train_full))
+    list_x_test_full <- c(list_x_test_full,list(x_test_full))
+    list_p_train <- c(list_p_train,list(p_train))
+    list_a_train <- c(list_a_train,list(a_train))
+    list_p_test <- c(list_p_test,list(p_test))
+    list_a_test <- c(list_a_test,list(a_test))
+  }
+  
+  list_to_return <- list("list_pa_train" =list_pa_train, "list_pa_test"=list_pa_test, "list_x_train_full"=list_x_train_full,"list_x_test_full"=list_x_test_full,"list_p_train"=list_p_train,"list_a_train"=list_a_train,"list_p_test"=list_p_test,"list_a_test"=list_a_test,"all_pa" =all_pa, "all_p"=all_p, "all_a"=all_a,"all_x_full"=all_x_full)
+  saveRDS(list_to_return, file = paste(maxent_result_dir,"/kfold_input_data_",this_bug,".RDS",sep = ''))
+  endTime <- Sys.time()
+  print(endTime-startTime)
+  return(list_to_return)
+}
+
+
+prepare_input_data_kfold_buffer_old1 <- function(occ_raw_path,clim,number_of_folds,shapefile_path,maxent_result_dir,buff_width = 55555){
   # input:
   # occ_raw_path: the path of the occurence data (in .csv format, with decimal longitude and latitude columns have column names 'DecimalLon',"DecimalLat")
   # clim: the stack of all input training raster data (after reprojection and alignment)
@@ -668,7 +954,7 @@ prepare_input_data_kfold_buffer_old <- function(occ_raw_path,clim,number_of_fold
   return(list_to_return)
 }
 
-prepare_input_data_kfold_buffer <- function(occ_raw_path,clim,number_of_folds,shapefile_path,maxent_result_dir,buff_width = 55555){
+prepare_input_data_kfold_buffer <- function(occ_raw_path,clim_dir,number_of_folds,shapefile_path,maxent_result_dir,buff_width = 55555){
   # input:
   # occ_raw_path: the path of the occurence data (in .csv format, with decimal longitude and latitude columns have column names 'DecimalLon',"DecimalLat")
   # clim: the stack of all input training raster data (after reprojection and alignment)
@@ -700,6 +986,11 @@ prepare_input_data_kfold_buffer <- function(occ_raw_path,clim,number_of_folds,sh
   
   cat("\nprepare input data...number of replicates: ",number_of_folds)
   startTime <- Sys.time()
+  
+  #### read clim
+  clim_list <- list.files(clim_dir, pattern = '.tif$', full.names = T)  # '..' leads to the path above the folder where the .rmd file is located
+  clim <- raster::stack(clim_list)
+  
   ########################################
   # read kissing bug presence points     #
   ########################################
@@ -1006,7 +1297,21 @@ run_maxent_model_training_all <- function(maxent_evaluate_dir,all_x_full,all_pa,
   return(mod)
 }
 
-run_maxent_model_prediction_basic <- function(mod,clim,maxent_raster_dir,dir_resample_mask,dir_sub_name){
+
+run_maxent_model_prediction_single <- function(mod,this_item_name,clim_dir,maxent_raster_dir_this){
+  startTime <- Sys.time()
+  print(this_item_name)
+  clim_list <- list.files(clim_dir, pattern = '.tif$', full.names = T)  # '..' leads to the path above the folder where the .rmd file is located
+  clim <- raster::stack(clim_list)
+  print("make prediction")
+  ped <- predict(mod,clim)
+  save_raster_path <- paste(maxent_raster_dir_this,"/",this_item_name,"_",this_bug,'.tif',sep = '')
+  writeRaster(ped, filename =save_raster_path, format = "GTiff")
+  endTime <- Sys.time()
+  print(endTime-startTime)
+}
+
+run_maxent_model_prediction_basic_old <- function(mod,clim,maxent_raster_dir,dir_resample_mask,dir_sub_name){
   # take one trained maxent model
   # perform prediction on historical and future projected 2071-2100 ssp1, ssp2, ssp3, ssp5 rasters (after aligned)
   # save the results as .tif files
@@ -1100,7 +1405,76 @@ run_maxent_model_prediction_basic <- function(mod,clim,maxent_raster_dir,dir_res
   print(endTime-startTime)
 }
 
-run_maxent_model_prediction_list <- function(mod_list,clim,maxent_raster_dir,dir_resample_mask,dir_sub_name,number_replicate){
+run_maxent_model_prediction_basic <- function(mod_path,clim_dir,maxent_raster_dir,dir_resample_mask,dir_sub_name){
+  # take one trained maxent model
+  # perform prediction on historical and future projected 2071-2100 ssp1, ssp2, ssp3, ssp5 rasters (after aligned)
+  # save the results as .tif files
+  cat("\nbasic prediction")
+  startTime <- Sys.time()
+  mod <- readRDS(mod_path)
+  dir_resample_mask_ssp1 <- paste(dir_resample_mask,'/ssp126_2071_2100/',sep = '')
+  dir_resample_mask_ssp2 <- paste(dir_resample_mask,'/ssp245_2071_2100/',sep = '')
+  dir_resample_mask_ssp3 <- paste(dir_resample_mask,'/ssp370_2071_2100/',sep = '')
+  dir_resample_mask_ssp5 <- paste(dir_resample_mask,'/ssp585_2071_2100/',sep = '')
+  
+  maxent_raster_dir_this <- paste(maxent_raster_dir,'/',dir_sub_name,sep = '')
+  print(maxent_raster_dir_this)
+  if (!dir.exists(maxent_raster_dir_this)){
+    dir.create(maxent_raster_dir_this)
+  }else{
+    print("dir exists")
+  }
+  
+  ########################################
+  # historical prediction                #
+  ########################################
+
+  run_maxent_model_prediction_single(mod=mod,
+                                     this_item_name=paste("historical_predict","_allinput",sep = ''),
+                                     clim_dir = clim_dir,
+                                     maxent_raster_dir_this=maxent_raster_dir_this)
+
+  ########################################
+  # predictions for the future   SSP1    #
+  ########################################
+  run_maxent_model_prediction_single(mod=mod,
+                                     this_item_name=paste("ssp126_predict","_allinput",sep = ''),
+                                     clim_dir = dir_resample_mask_ssp1,
+                                     maxent_raster_dir_this=maxent_raster_dir_this)
+  
+  ########################################
+  # predictions for the future   SSP2    #
+  ########################################
+  
+  run_maxent_model_prediction_single(mod=mod,
+                                     this_item_name=paste("ssp245_predict","_allinput",sep = ''),
+                                     clim_dir = dir_resample_mask_ssp2,
+                                     maxent_raster_dir_this=maxent_raster_dir_this)
+  
+  ########################################
+  # predictions for the future   SSP3    #
+  ########################################
+  
+  run_maxent_model_prediction_single(mod=mod,
+                                     this_item_name=paste("ssp370_predict","_allinput",sep = ''),
+                                     clim_dir = dir_resample_mask_ssp3,
+                                     maxent_raster_dir_this=maxent_raster_dir_this)
+  
+  ########################################
+  # predictions for the future   SSP5    #
+  ########################################
+  
+  run_maxent_model_prediction_single(mod=mod,
+                                     this_item_name=paste("ssp585_predict","_allinput",sep = ''),
+                                     clim_dir = dir_resample_mask_ssp5,
+                                     maxent_raster_dir_this=maxent_raster_dir_this)
+  
+  endTime <- Sys.time()
+  print(endTime-startTime)
+}
+
+
+run_maxent_model_prediction_list_old <- function(mod_list,clim,maxent_raster_dir,dir_resample_mask,dir_sub_name,number_replicate){
   # take a list of trained maxent models
   # perform prediction on historical and future projected 2071-2100 ssp1, ssp2, ssp3, ssp5 rasters (after aligned)
   # save the results as .tif files
@@ -1202,3 +1576,77 @@ run_maxent_model_prediction_list <- function(mod_list,clim,maxent_raster_dir,dir
 }
 
 
+run_maxent_model_prediction_list <- function(mod_list_path,clim,maxent_raster_dir,dir_resample_mask,dir_sub_name,number_replicate){
+  # take a list of trained maxent models
+  # perform prediction on historical and future projected 2071-2100 ssp1, ssp2, ssp3, ssp5 rasters (after aligned)
+  # save the results as .tif files
+  
+  # mod_list: list of trained maxent models
+  # clim: historical bioclimatic rasters (aligned)
+  # maxent_raster_dir: the directory under which the bioclimatic rasters (aligned) are stored, with rasters for ssp1 - ssp5 stored under corresponding subfolders.
+  
+  cat("\nmodel-list prediction")
+  startTime <- Sys.time()
+  mod_list <- readRDS(mod_list_path)
+  dir_resample_mask_ssp1 <- paste(dir_resample_mask,'/ssp126_2071_2100/',sep = '')
+  dir_resample_mask_ssp2 <- paste(dir_resample_mask,'/ssp245_2071_2100/',sep = '')
+  dir_resample_mask_ssp3 <- paste(dir_resample_mask,'/ssp370_2071_2100/',sep = '')
+  dir_resample_mask_ssp5 <- paste(dir_resample_mask,'/ssp585_2071_2100/',sep = '')
+  
+  maxent_raster_dir_this <- paste(maxent_raster_dir,'/',dir_sub_name,sep = '')
+  print(maxent_raster_dir_this)
+  if (!dir.exists(maxent_raster_dir_this)){
+    dir.create(maxent_raster_dir_this)
+  }else{
+    print("dir exists")
+  }
+  for (i in 1:number_replicate){
+    cat("\n",i)
+    mod <- mod_list[[i]]
+    ########################################
+    # historical prediction                #
+    ########################################
+    
+    run_maxent_model_prediction_single(mod=mod,
+                                       this_item_name=paste("historical_predict_",i,sep = ''),
+                                       clim_dir = clim_dir,
+                                       maxent_raster_dir_this=maxent_raster_dir_this)
+    
+    ########################################
+    # predictions for the future   SSP1    #
+    ########################################
+    run_maxent_model_prediction_single(mod=mod,
+                                       this_item_name=paste("ssp126_predict_",i,sep = ''),
+                                       clim_dir = dir_resample_mask_ssp1,
+                                       maxent_raster_dir_this=maxent_raster_dir_this)
+    
+    ########################################
+    # predictions for the future   SSP2    #
+    ########################################
+    
+    run_maxent_model_prediction_single(mod=mod,
+                                       this_item_name=paste("ssp245_predict_",i,sep = ''),
+                                       clim_dir = dir_resample_mask_ssp2,
+                                       maxent_raster_dir_this=maxent_raster_dir_this)
+    
+    ########################################
+    # predictions for the future   SSP3    #
+    ########################################
+    
+    run_maxent_model_prediction_single(mod=mod,
+                                       this_item_name=paste("ssp370_predict_",i,sep = ''),
+                                       clim_dir = dir_resample_mask_ssp3,
+                                       maxent_raster_dir_this=maxent_raster_dir_this)
+    
+    ########################################
+    # predictions for the future   SSP5    #
+    ########################################
+    
+    run_maxent_model_prediction_single(mod=mod,
+                                       this_item_name=paste("ssp585_predict_",i,sep = ''),
+                                       clim_dir = dir_resample_mask_ssp5,
+                                       maxent_raster_dir_this=maxent_raster_dir_this)
+  }
+  endTime <- Sys.time()
+  print(endTime-startTime)
+}

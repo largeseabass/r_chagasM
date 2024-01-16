@@ -9,6 +9,10 @@ library("rprojroot")
 library("caret")
 library("Metrics")
 source("/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/pre-testing/process-data.R")
+
+#todo: update the clim_dir in all packed function
+
+
 run_maxent_simple <- function(this_bug,number_replicate,top_file_dir){
   # create one train-test split, train the maxent model, generate evaluation metrics, and obtain the historical and future projected predictions.
   ########################################
@@ -252,12 +256,16 @@ run_maxent_kfold_buffer_cv <- function(this_bug,number_replicate,top_file_dir){
 this_bug = 'San'
 number_replicate = 10
 top_file_dir = "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/output/kfold_buffer"
+
+
 ########################################
 # read bioclimatic and land cover data #
 ########################################
 
-clim_list <- list.files("/Users/vivianhuang/Desktop/resample_mask/historical/", pattern = '.tif$', full.names = T)  # '..' leads to the path above the folder where the .rmd file is located
-clim <- raster::stack(clim_list)
+# clim_list <- list.files("/Users/vivianhuang/Desktop/resample_mask/historical/", pattern = '.tif$', full.names = T)  # '..' leads to the path above the folder where the .rmd file is located
+# clim <- raster::stack(clim_list)
+
+clim_dir <- "/Users/vivianhuang/Desktop/resample_mask/historical/"
 
 ########################################
 # all the saving paths                 #
@@ -274,13 +282,12 @@ all_path_stack <- all_saving_paths(top_file_dir=top_file_dir,this_bug=this_bug)
 # shapefile path for the vector having the shape of the reprojected and aligned input raster
 shapefile_path <-"/Users/vivianhuang/desktop/R-modeling-scripts/r_chagasM/masked_raster/shapefile.shp"
 
-input_data_stack_with_folds_buffer <- prepare_input_data_kfold_buffer(occ_raw_path=occ_raw_path,
-                                                                      clim=clim,
-                                                                      number_of_folds=number_replicate,
-                                                                      shapefile_path=shapefile_path,
-                                                                      maxent_result_dir=all_path_stack$maxent_result_dir,
-                                                                      buff_width = 55555)
-input_data_stack_with_folds_buffer <- readRDS("/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/kfold_buffer_input_data_San.RDS")
+this_input_data_stack <- prepare_input_data_kfold_buffer(occ_raw_path=occ_raw_path,
+                                                         clim=clim_dir,
+                                                         number_of_folds=number_replicate,
+                                                         shapefile_path=shapefile_path,
+                                                         maxent_result_dir=all_path_stack$maxent_result_dir,
+                                                         buff_width = 55555)
 ########################################
 # run MaxEnt                           #
 ########################################
@@ -293,7 +300,6 @@ utils::download.file(url = "https://raw.githubusercontent.com/mrmaxent/Maxent/ma
                                        "/maxent.jar"), mode = "wb")  ## wb for binary file, otherwise maxent.jar can not execute
 
 # perform cross-validation
-this_input_data_stack <- input_data_stack_with_folds_buffer
 cv_result_list <- run_maxent_model_cv(list_x_train_full=this_input_data_stack$list_x_train_full,
                                       list_x_test_full=this_input_data_stack$list_x_test_full,
                                       list_pa_train=this_input_data_stack$list_pa_train,
@@ -320,20 +326,23 @@ this_model <- run_maxent_model_training_all(maxent_evaluate_dir=all_path_stack$m
 ########################################
 # predictions              #
 ########################################
+rm(this_input_data_stack)
 
 dir_resample_mask <- "/Users/vivianhuang/desktop/resample_mask"
 
+cv_result_list_path <- "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/output/kfold_buffer/San/evaluate/cv_models.RDS"
+this_model_path <- "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/output/kfold_buffer/result/model/kfold_buffer_all_input_final_model_training_all.RDS"
 # perform predictions on all the cv models
-run_maxent_model_prediction_list(mod_list=cv_result_list$model_list,
-                                 clim=clim,
+run_maxent_model_prediction_list(mod_list_path=cv_result_list_path,#cv_result_list$model_list,
+                                 clim=clim_dir,
                                  maxent_raster_dir=all_path_stack$maxent_raster_dir,
                                  dir_resample_mask=dir_resample_mask,
                                  dir_sub_name='cross_validation',
                                  number_replicate=number_replicate)
 
 # perform predictions on the model trained with all input data
-run_maxent_model_prediction_basic(mod=this_model,
-                                  clim=clim,
+run_maxent_model_prediction_basic(mod_path=this_model_path,
+                                  clim=clim_dir,
                                   maxent_raster_dir=all_path_stack$maxent_raster_dir,
                                   dir_resample_mask=dir_resample_mask,
                                   dir_sub_name="kfold_buffer_all_input")

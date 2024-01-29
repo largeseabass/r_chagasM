@@ -659,7 +659,7 @@ run_maxent_model_prediction_basic_grid_old <- function(mod,grid_path_list,dir_su
 }
 
 
-run_maxent_model_prediction_single <- function(mod,this_item_name,grid_path_list_this,maxent_raster_dir_this,historical=F){
+run_maxent_model_prediction_single_grid <- function(mod,this_item_name,grid_path_list_this,maxent_raster_dir_this,historical=F){
   startTime <- Sys.time()
   print(this_item_name)
   
@@ -736,7 +736,7 @@ run_maxent_model_prediction_list_grid_old <- function(mod_list,grid_path_list,di
     ########################################
     # predictions for the future   SSP1    #
     ########################################
-    run_maxent_model_prediction_single(mod=mod,
+    run_maxent_model_prediction_single_grid(mod=mod,
                                        this_item_name=paste("historical_predict",i,sep = ''),
                                        this_item_path=grid_path_list$historical_all,
                                        maxent_raster_dir_this=maxent_raster_dir_this,
@@ -828,7 +828,7 @@ run_maxent_model_prediction_basic_grid <- function(mod_list,grid_path_list,dir_s
   ########################################
   #  
 
-  run_maxent_model_prediction_single(mod=mod,
+  run_maxent_model_prediction_single_grid(mod=mod,
                                      this_item_name=paste("historical_predict","_allinput",sep = ''),
                                      grid_path_list_this = grid_path_list$historical_all,
                                      maxent_raster_dir_this=maxent_raster_dir_this,
@@ -837,7 +837,7 @@ run_maxent_model_prediction_basic_grid <- function(mod_list,grid_path_list,dir_s
   ########################################
   # predictions for the future   SSP1    #
   ########################################
-  run_maxent_model_prediction_single(mod=mod,
+  run_maxent_model_prediction_single_grid(mod=mod,
                                      this_item_name=paste("ssp126","_allinput",sep = ''),
                                      grid_path_list_this = c(grid_path_list$ssp1_lc,grid_path_list$ssp1_bc),
                                      maxent_raster_dir_this=maxent_raster_dir_this,
@@ -847,7 +847,7 @@ run_maxent_model_prediction_basic_grid <- function(mod_list,grid_path_list,dir_s
   ########################################
   # predictions for the future   SSP2    #
   ########################################
-  run_maxent_model_prediction_single(mod=mod,
+  run_maxent_model_prediction_single_grid(mod=mod,
                                      this_item_name=paste("ssp245","_allinput",sep = ''),
                                      grid_path_list_this = c(grid_path_list$ssp2_lc,grid_path_list$ssp2_bc),
                                      maxent_raster_dir_this=maxent_raster_dir_this,
@@ -857,7 +857,7 @@ run_maxent_model_prediction_basic_grid <- function(mod_list,grid_path_list,dir_s
   # predictions for the future   SSP3    #
   ########################################
 
-  run_maxent_model_prediction_single(mod=mod,
+  run_maxent_model_prediction_single_grid(mod=mod,
                                      this_item_name=paste("ssp370","_allinput",sep = ''),
                                      grid_path_list_this = c(grid_path_list$ssp3_lc,grid_path_list$ssp3_bc),
                                      maxent_raster_dir_this=maxent_raster_dir_this,
@@ -868,7 +868,7 @@ run_maxent_model_prediction_basic_grid <- function(mod_list,grid_path_list,dir_s
   # predictions for the future   SSP5    #
   ########################################
 
-  run_maxent_model_prediction_single(mod=mod,
+  run_maxent_model_prediction_single_grid(mod=mod,
                                      this_item_name=paste("ssp585","_allinput",sep = ''),
                                      grid_path_list_this = c(grid_path_list$ssp5_lc,grid_path_list$ssp5_bc),
                                      maxent_raster_dir_this=maxent_raster_dir_this,
@@ -904,7 +904,7 @@ run_maxent_model_prediction_list_grid <- function(mod_list_path,grid_path_list,d
     ########################################
     #  
     startTime <- Sys.time()
-    run_maxent_model_prediction_single(mod=mod,
+    run_maxent_model_prediction_single_grid(mod=mod,
                                        this_item_name=paste("historical_predict",i,sep = ''),
                                        grid_path_list_this = grid_path_list$historical_all,
                                        maxent_raster_dir_this=maxent_raster_dir_this,
@@ -918,7 +918,7 @@ run_maxent_model_prediction_list_grid <- function(mod_list_path,grid_path_list,d
     # predictions for the future   SSP1    #
     ########################################
     startTime <- Sys.time()
-    run_maxent_model_prediction_single(mod=mod,
+    run_maxent_model_prediction_single_grid(mod=mod,
                                        this_item_name=paste("ssp126",i,sep = ''),
                                        grid_path_list_this = c(grid_path_list$ssp1_lc,grid_path_list$ssp1_bc),
                                        maxent_raster_dir_this=maxent_raster_dir_this,
@@ -933,7 +933,7 @@ run_maxent_model_prediction_list_grid <- function(mod_list_path,grid_path_list,d
     ########################################
     
     startTime <- Sys.time()
-    run_maxent_model_prediction_single(mod=mod,
+    run_maxent_model_prediction_single_grid(mod=mod,
                                        this_item_name=paste("ssp245",i,sep = ''),
                                        grid_path_list_this = c(grid_path_list$ssp2_lc,grid_path_list$ssp2_bc),
                                        maxent_raster_dir_this=maxent_raster_dir_this,
@@ -948,7 +948,7 @@ run_maxent_model_prediction_list_grid <- function(mod_list_path,grid_path_list,d
     ########################################
     
     startTime <- Sys.time()
-    run_maxent_model_prediction_single(mod=mod,
+    run_maxent_model_prediction_single_grid(mod=mod,
                                        this_item_name=paste("ssp370",i,sep = ''),
                                        grid_path_list_this = c(grid_path_list$ssp3_lc,grid_path_list$ssp3_bc),
                                        maxent_raster_dir_this=maxent_raster_dir_this,
@@ -963,7 +963,7 @@ run_maxent_model_prediction_list_grid <- function(mod_list_path,grid_path_list,d
     ########################################
     
     startTime <- Sys.time()
-    run_maxent_model_prediction_single(mod=mod,
+    run_maxent_model_prediction_single_grid(mod=mod,
                                        this_item_name=paste("ssp585",i,sep = ''),
                                        grid_path_list_this = c(grid_path_list$ssp5_lc,grid_path_list$ssp5_bc),
                                        maxent_raster_dir_this=maxent_raster_dir_this,
@@ -977,7 +977,7 @@ run_maxent_model_prediction_list_grid <- function(mod_list_path,grid_path_list,d
 }
 
 
-run_maxent_model_prediction_single_save_memory <- function(mod,this_item_name,grid_path_list_this,maxent_raster_dir_this,historical=F){
+run_maxent_model_prediction_single_grid_save_memory <- function(mod,this_item_name,grid_path_list_this,maxent_raster_dir_this,historical=F){
   startTime <- Sys.time()
   print(this_item_name)
   
@@ -1031,7 +1031,7 @@ run_maxent_model_prediction_list_grid_save_memory <- function(mod_list_path,grid
     ########################################
     #  
     startTime <- Sys.time()
-    run_maxent_model_prediction_single(mod=mod,
+    run_maxent_model_prediction_single_grid(mod=mod,
                                        this_item_name=paste("historical_predict",i,sep = ''),
                                        grid_path_list_this = grid_path_list$historical_all,
                                        maxent_raster_dir_this=maxent_raster_dir_this,
@@ -1045,7 +1045,7 @@ run_maxent_model_prediction_list_grid_save_memory <- function(mod_list_path,grid
     # predictions for the future   SSP1    #
     ########################################
     startTime <- Sys.time()
-    run_maxent_model_prediction_single(mod=mod,
+    run_maxent_model_prediction_single_grid(mod=mod,
                                        this_item_name=paste("ssp126",i,sep = ''),
                                        grid_path_list_this = c(grid_path_list$ssp1_lc,grid_path_list$ssp1_bc),
                                        maxent_raster_dir_this=maxent_raster_dir_this,
@@ -1060,7 +1060,7 @@ run_maxent_model_prediction_list_grid_save_memory <- function(mod_list_path,grid
     ########################################
     
     startTime <- Sys.time()
-    run_maxent_model_prediction_single(mod=mod,
+    run_maxent_model_prediction_single_grid(mod=mod,
                                        this_item_name=paste("ssp245",i,sep = ''),
                                        grid_path_list_this = c(grid_path_list$ssp2_lc,grid_path_list$ssp2_bc),
                                        maxent_raster_dir_this=maxent_raster_dir_this,
@@ -1075,7 +1075,7 @@ run_maxent_model_prediction_list_grid_save_memory <- function(mod_list_path,grid
     ########################################
     
     startTime <- Sys.time()
-    run_maxent_model_prediction_single(mod=mod,
+    run_maxent_model_prediction_single_grid(mod=mod,
                                        this_item_name=paste("ssp370",i,sep = ''),
                                        grid_path_list_this = c(grid_path_list$ssp3_lc,grid_path_list$ssp3_bc),
                                        maxent_raster_dir_this=maxent_raster_dir_this,
@@ -1090,7 +1090,7 @@ run_maxent_model_prediction_list_grid_save_memory <- function(mod_list_path,grid
     ########################################
     
     startTime <- Sys.time()
-    run_maxent_model_prediction_single(mod=mod,
+    run_maxent_model_prediction_single_grid(mod=mod,
                                        this_item_name=paste("ssp585",i,sep = ''),
                                        grid_path_list_this = c(grid_path_list$ssp5_lc,grid_path_list$ssp5_bc),
                                        maxent_raster_dir_this=maxent_raster_dir_this,

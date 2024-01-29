@@ -1159,7 +1159,7 @@ overall_startTime <- Sys.time()
 
 this_bug = 'San'
 number_replicate = 10
-top_file_dir = "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/output/kfold_grid_buffer_process"
+top_file_dir = "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/output/kfold_grid_process"
 occ_grid_path = "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/cell/San.csv"
 clim_grid_path = "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/historical/5km.csv"
 buffer_grid_path = "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/buffer/San.csv"
@@ -1240,8 +1240,13 @@ this_model <- run_maxent_model_training_all_grid(maxent_evaluate_dir=all_path_st
 pp_pca <- this_input_data_stack$pp_pca
 rm(this_input_data_stack)
 
+pp_pca <- readRDS(paste(top_file_dir,"/San/result/kfold_input_data_pcaSan.RDS",sep = ''))
+cv_models_path <- paste(top_file_dir,"/San/evaluate/cv_models.RDS",sep = '')
+this_model_path <- paste(top_file_dir,"/San/result/model/kfold_all_input_final_model_training_all.RDS",sep = '')
+cv_models <- readRDS(cv_models_path)
+this_model <- readRDS(this_model_path)
 # perform predictions on all the cv models
-run_maxent_model_prediction_list_grid_pca(mod_list=cv_result_list$model_list,
+run_maxent_model_prediction_list_grid_pca(mod_list=cv_models,#cv_result_list$model_list,
                                           grid_path_list=grid_path_list,
                                           dir_sub_name='cross_validation',
                                           number_replicate=number_replicate,

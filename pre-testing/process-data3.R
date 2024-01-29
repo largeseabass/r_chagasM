@@ -578,7 +578,7 @@ run_maxent_model_training_all <- function(maxent_evaluate_dir,all_x_full,all_pa,
 
 #todo
 
-raster_pca <- function(pp_pca,input_raster_dir){
+raster_pca <- function(pp_pca,input_raster_dir,maxent_result_dir,this_raster_stack_name){
   # inspired by https://github.com/marlonecobos/kuenm/blob/master/R/kuenm_rpca.R
   
   # "pp_pca": the model to conduct pca
@@ -586,9 +586,24 @@ raster_pca <- function(pp_pca,input_raster_dir){
   
   # This function aims at preparing the input rasters (for making predictions with trained models) based on the training pca 
   
-  p_stackp <- na.omit(raster::values(p_stack))
+  # if this raster stack exist, exit this function
+  raster_stack_saving_path <- paste(maxent_result_dir,"/",this_raster_stack_name,".RDS",sep = '')
+  if (file.exists(raster_stack_saving_path)){
+    cat("\n this raster stack exists:", raster_stack_saving_path,sep = "")
+    return()
+  }
+  
+  # read input raster
+  input_raster_list <- list.files(input_raster_dir, pattern = '.tif$', full.names = T)  # '..' leads to the path above the folder where the .rmd file is located
+  input_raster_stack <- na.omit(raster::stack(input_raster_list))
+  
   colnames(p_stackp) <- names(pca[[4]])
   p_pcs <- predict(pca, newdata = p_stackp)
+  
+  number_pc <-
+    
+  # save the pca raster stack as .RDS file
+  saveRDS(pp_pca, file = paste(maxent_result_dir,"/",this_raster_stack_name,".RDS",sep = ''))
   
 }
 
@@ -767,6 +782,7 @@ occ_raw_path <- paste("/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/d
 #/output folder saves all the output
 all_path_stack <- all_saving_paths(top_file_dir=top_file_dir,this_bug=this_bug)
 
+# Here
 this_input_data_stack <- prepare_input_data_kfold_pca(occ_raw_path=occ_raw_path,
                                                       clim_dir=clim_dir,
                                                       number_of_folds=number_replicate,
@@ -779,6 +795,11 @@ this_input_data_stack <- prepare_input_data_kfold_pca(occ_raw_path=occ_raw_path,
 #                                                              maxent_result_dir=all_path_stack$maxent_result_dir,
 #                                                              buff_width = 55555)
 
+##########################################
+# perform pca on all input raster stacks #
+##########################################
+raster_pca(pp_pca=this_input_data_stack$pp_pca,
+           input_raster_dir=clim_dir)
 ########################################
 # run MaxEnt                           #
 ########################################
@@ -816,10 +837,68 @@ this_model <- run_maxent_model_training_all_grid(maxent_evaluate_dir=all_path_st
                                                  model_saving=T)
 
 
-pca <- this_input_data_stack$pp_pca
+process_spatial_chunk <- function(chunk, pca_model) {
+  print("process_spatial_chunk")
+  # Assuming 'chunk' is a raster stack with all layers but a subset of the area
+  chunk_clean <- na.omit(raster::values(chunk))
+  pca_result <- predict(pca_model, newdata = chunk_clean)
+  return(raster::rasterFromXYZ(cbind(coordinates(chunk), pca_result)))
+}
+
+# Main function to process the raster stack in spatial chunks
+process_raster_spatially <- function(raster_stack, pca_model, num_chunks) {
+  processed_stack <- list()
+  extent_raster <- extent(raster_stack)
+  
+  # Divide the extent into spatial chunks
+  chunk_width <- (extent_raster@xmax - extent_raster@xmin) / num_chunks
+  
+  for (i in 1:num_chunks) {
+    cat("\n",i)
+    xmin_chunk <- extent_raster@xmin + (i - 1) * chunk_width
+    xmax_chunk <- xmin_chunk + chunk_width
+    chunk_extent <- extent(xmin_chunk, xmax_chunk, extent_raster@ymin, extent_raster@ymax)
+    cat("\n crop")
+    chunk <- crop(raster_stack, chunk_extent)
+    processed_stack[[i]] <- process_spatial_chunk(chunk, pca_model)
+  }
+  
+  # Combine processed chunks
+  cat("\n merge")
+  final_raster <- do.call(merge, processed_stack)
+  return(final_raster)
+}
+
+pca_model <- this_input_data_stack$pp_pca  # Assume pca_model is predefined
 this_clim_list <- list.files(clim_dir, pattern = '.tif$', full.names = T)  # '..' leads to the path above the folder where the .rmd file is located
 this_clim <- raster::stack(this_clim_list)
+this_raster_subset <- raster::subset(this_clim,names(pca$mean))
+num_chunks <- 20  # Define the number of spatial chunks
 
-this_clean_clim <- na.omit(raster::values(this_clim))
-colnames(this_clean_clim) <- names(pca[[4]])
-p_pcs <- predict(pca, newdata = p_stackp)
+raster_stack <- this_raster_subset
+extent_raster <- extent(raster_stack)
+chunk_width <- (extent_raster@xmax - extent_raster@xmin) / num_chunks
+xmin_chunk <- extent_raster@xmin + (1 - 1) * chunk_width
+xmax_chunk <- xmin_chunk + chunk_width
+chunk_extent <- extent(xmin_chunk, xmax_chunk, extent_raster@ymin, extent_raster@ymax)
+cat("\n crop")
+chunk <- crop(raster_stack, chunk_extent)
+chunk_coordinates <- as.data.frame(coordinates(chunk))
+chunk_value <- raster::values(chunk)
+
+chunk_value$x <- chunk_coordinates$x
+chunk_value$y <- chunk_coordinates$y
+
+chunk_clean <- na.omit(chunk_value)
+final_coordinates <- rbind(chunk_clean$x,chunk_clean$y)
+chunk_nocrs <- subset(chunk_clean,select = -c(x, y))
+pca_result <- predict(pca_model, newdata = chunk_nocrs)
+this_pca_raster <- raster::rasterFromXYZ(cbind(final_coordinates, pca_result))
+saveRDS(this_pca_raster, file = "/Users/vivianhuang/Desktop/my_raster_test.RDS")
+pca_result <- predict(pca_model, newdata = chunk_clean)
+dim(coordinates(chunk))
+dim(pca_result)
+processed_raster <- process_raster_spatially(this_raster_subset, pca_model, num_chunks)
+
+
+

@@ -253,8 +253,9 @@ run_maxent_kfold_buffer_cv <- function(this_bug,number_replicate,top_file_dir){
   
 }
 
-this_bug = 'San'
+this_bug = 'Rec'
 number_replicate = 10
+dir_sub_name = "kfold_buffer_all_input"
 top_file_dir = "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/output/kfold_buffer"
 
 
@@ -319,20 +320,22 @@ this_model <- run_maxent_model_training_all(maxent_evaluate_dir=all_path_stack$m
                                             all_x_full= this_input_data_stack$all_x_full,
                                             all_pa= this_input_data_stack$all_pa,
                                             maxent_result_path=all_path_stack$maxent_result_path,
-                                            dir_sub_name="kfold_buffer_all_input",
+                                            dir_sub_name=dir_sub_name,
                                             maxent_model_dir=all_path_stack$maxent_model_dir,
                                             model_saving=T)
 
 ########################################
 # predictions              #
 ########################################
-rm(this_input_data_stack)
+
 
 dir_resample_mask <- "/Users/vivianhuang/desktop/resample_mask"
 
-cv_result_list_path <- "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/output/kfold_buffer/San/evaluate/cv_models.RDS"
-this_model_path <- "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/output/kfold_buffer/result/model/kfold_buffer_all_input_final_model_training_all.RDS"
+cv_result_list_path <- paste(all_path_stack$maxent_evaluate_dir,'/cv_models.RDS',sep = '')
+this_model_path <- paste(all_path_stack$maxent_evaluate_dir,'/',dir_sub_name,'_final_model_training_all.RDS',sep = '')
 # perform predictions on all the cv models
+rm(this_input_data_stack)
+
 run_maxent_model_prediction_list(mod_list_path=cv_result_list_path,#cv_result_list$model_list,
                                  clim=clim_dir,
                                  maxent_raster_dir=all_path_stack$maxent_raster_dir,
@@ -345,7 +348,7 @@ run_maxent_model_prediction_basic(mod_path=this_model_path,
                                   clim=clim_dir,
                                   maxent_raster_dir=all_path_stack$maxent_raster_dir,
                                   dir_resample_mask=dir_resample_mask,
-                                  dir_sub_name="kfold_buffer_all_input")
+                                  dir_sub_name=dir_sub_name)
 
 # run_maxent_kfold_buffer_cv(this_bug = this_bug, number_replicate = number_replicate,top_file_dir = "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/output/kfold_buffer")
 # 

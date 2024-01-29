@@ -183,7 +183,7 @@ prepare_input_data_kfold_grid_pca <- function(occ_grid_path,clim_grid_path,numbe
   ########################################
   combine_input_data_all <- as.data.frame(rbind(all_p, all_a))
   combine_input_data_id <- combine_input_data_all$id
-
+  
   # zero or near-zero variance
   combine_input_data <- subset(combine_input_data_all,select = -c(id))
   nzv <- nearZeroVar(combine_input_data)
@@ -763,11 +763,11 @@ run_maxent_model_prediction_basic_grid_pca <- function(mod,grid_path_list,dir_su
   #  
   startTime <- Sys.time()
   run_maxent_model_prediction_single_pca(mod=mod,
-                                        this_item_name=paste("historical_predict","_allinput",sep = ''),
-                                        grid_path_list_this = grid_path_list$historical_all,
-                                        maxent_raster_dir_this=maxent_raster_dir_this,
-                                        pp_pca=pp_pca,
-                                        historical=T)
+                                         this_item_name=paste("historical_predict","_allinput",sep = ''),
+                                         grid_path_list_this = grid_path_list$historical_all,
+                                         maxent_raster_dir_this=maxent_raster_dir_this,
+                                         pp_pca=pp_pca,
+                                         historical=T)
   
   print("historical_clim")
   
@@ -1159,7 +1159,8 @@ overall_startTime <- Sys.time()
 
 this_bug = 'Rec'
 number_replicate = 10
-top_file_dir = "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/output/kfold_grid_process"
+dir_sub_name = "kfold_buffer_all_input"
+top_file_dir = "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/output/kfold_grid_buffer_process"
 occ_grid_path = paste("/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/cell/",this_bug,".csv",sep = '')
 clim_grid_path = "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/historical/5km.csv"
 buffer_grid_path = paste("/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/buffer/",this_bug,".csv",sep = '')
@@ -1228,7 +1229,7 @@ this_model <- run_maxent_model_training_all_grid(maxent_evaluate_dir=all_path_st
                                                  all_x_full=this_input_data_stack$all_x_full,
                                                  all_pa=this_input_data_stack$all_pa,
                                                  maxent_result_path=all_path_stack$maxent_result_path,
-                                                 dir_sub_name="kfold_all_input",
+                                                 dir_sub_name=dir_sub_name,
                                                  maxent_model_dir=all_path_stack$maxent_model_dir,
                                                  model_saving=T)
 
@@ -1238,14 +1239,15 @@ this_model <- run_maxent_model_training_all_grid(maxent_evaluate_dir=all_path_st
 # predictions              #
 ########################################
 pp_pca <- this_input_data_stack$pp_pca
-rm(this_input_data_stack)
+
 
 pp_pca <- readRDS(paste(top_file_dir,"/",this_bug,"/result/kfold_input_data_pca",this_bug,".RDS",sep = ''))
 cv_models_path <- paste(top_file_dir,"/",this_bug,"/evaluate/cv_models.RDS",sep = '')
-this_model_path <- paste(top_file_dir,"/",this_bug,"/result/model/kfold_all_input_final_model_training_all.RDS",sep = '')
+this_model_path <- paste(all_path_stack$maxent_model_dir,'/',dir_sub_name,'_final_model_training_all.RDS',sep = '')
 cv_models <- readRDS(cv_models_path)
 this_model <- readRDS(this_model_path)
 # perform predictions on all the cv models
+rm(this_input_data_stack)
 run_maxent_model_prediction_list_grid_pca(mod_list=cv_models,#cv_result_list$model_list,
                                           grid_path_list=grid_path_list,
                                           dir_sub_name='cross_validation',
@@ -1255,25 +1257,10 @@ run_maxent_model_prediction_list_grid_pca(mod_list=cv_models,#cv_result_list$mod
 # perform predictions on the model trained with all input data
 run_maxent_model_prediction_basic_grid_pca(mod=this_model,
                                            grid_path_list=grid_path_list,
-                                           dir_sub_name="kfold_all_input",
+                                           dir_sub_name=dir_sub_name,
                                            pp_pca=pp_pca,
                                            maxent_raster_dir=all_path_stack$maxent_raster_dir)
 
 overall_endTime <- Sys.time()
 cat("overall running time")
 print(overall_endTime - overall_startTime)
-# historical_grid <- read.csv(grid_path_list$historical_all)
-# historical_all_area_grid <- subset(historical_grid[complete.cases(historical_grid), ],select = -c(left, top,right,bottom,X,forest_grassland))
-# historical_cell_id <-  historical_all_area_grid$id
-# column_names <- names(input_data_stack_with_folds$pp_pca$mean)
-# #historical_all_area_grid_no_id_clean <- subset(historical_all_area_grid_no_id,select = column_names)
-# 
-# historical_all_area_grid_no_id <- subset(historical_all_area_grid,select = column_names)#subset(historical_all_area_grid,select = -c(id))
-# historical_all_area_grid_no_id <- predict(input_data_stack_with_folds$pp_pca, newdata = historical_all_area_grid_no_id)
-# ped <- predict(this_model,historical_all_area_grid_no_id)
-# # save csv file
-# final_prediction <- as.data.frame(list(id = historical_cell_id,
-#                                        prediction = ped))
-# 
-# save_csv_path <- paste(maxent_raster_dir_this,"/historical_predict_",this_bug,'.csv',sep = '')
-

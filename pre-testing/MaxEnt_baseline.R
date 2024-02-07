@@ -255,7 +255,7 @@ run_maxent_kfold_buffer_cv <- function(this_bug,number_replicate,top_file_dir){
 
 this_bug = 'Rec'
 number_replicate = 10
-dir_sub_name = "kfold_buffer_all_input"
+dir_sub_name = "all_input"#"kfold_buffer_all_input"
 top_file_dir = "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/output/kfold_buffer"
 
 

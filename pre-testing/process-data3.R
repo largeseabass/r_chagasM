@@ -872,7 +872,7 @@ process_raster_spatially <- function(raster_stack, pca_model, num_chunks) {
 pca_model <- this_input_data_stack$pp_pca  # Assume pca_model is predefined
 this_clim_list <- list.files(clim_dir, pattern = '.tif$', full.names = T)  # '..' leads to the path above the folder where the .rmd file is located
 this_clim <- raster::stack(this_clim_list)
-this_raster_subset <- raster::subset(this_clim,names(pca$mean))
+this_raster_subset <- raster::subset(this_clim,names(pca_model$mean))
 num_chunks <- 20  # Define the number of spatial chunks
 
 raster_stack <- this_raster_subset
@@ -896,7 +896,8 @@ pca_result <- predict(pca_model, newdata = chunk_nocrs)
 this_pca_raster <- raster::rasterFromXYZ(cbind(final_coordinates, pca_result))
 saveRDS(this_pca_raster, file = "/Users/vivianhuang/Desktop/my_raster_test.RDS")
 pca_result <- predict(pca_model, newdata = chunk_clean)
-dim(coordinates(chunk))
+dim(coordinates(chunk_clean))
+names(chunk_clean)
 dim(pca_result)
 processed_raster <- process_raster_spatially(this_raster_subset, pca_model, num_chunks)
 

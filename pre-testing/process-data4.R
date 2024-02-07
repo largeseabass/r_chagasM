@@ -1159,6 +1159,7 @@ overall_startTime <- Sys.time()
 
 this_bug = 'Rec'
 number_replicate = 10
+dir_sub_name = "kfold_all_input"
 top_file_dir = "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/output/kfold_grid_process"
 occ_grid_path = paste("/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/cell/",this_bug,".csv",sep = '')
 clim_grid_path = "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/historical/5km.csv"
@@ -1186,16 +1187,16 @@ all_path_stack <- all_saving_paths(top_file_dir=top_file_dir,this_bug=this_bug)
 ########################################
 
 
-# this_input_data_stack <- prepare_input_data_kfold_grid_pca(occ_grid_path=occ_grid_path,
-#                                                            clim_grid_path=clim_grid_path,
-#                                                            number_of_folds=number_replicate,
-#                                                            maxent_result_dir=all_path_stack$maxent_result_dir)
+this_input_data_stack <- prepare_input_data_kfold_grid_pca(occ_grid_path=occ_grid_path,
+                                                           clim_grid_path=clim_grid_path,
+                                                           number_of_folds=number_replicate,
+                                                           maxent_result_dir=all_path_stack$maxent_result_dir)
 
-this_input_data_stack <- prepare_input_data_kfold_buffer_grid_pca(occ_grid_path=occ_grid_path,
-                                                                  clim_grid_path=clim_grid_path,
-                                                                  buffer_grid_path=buffer_grid_path,
-                                                                  number_of_folds=number_replicate,
-                                                                  maxent_result_dir=all_path_stack$maxent_result_dir)
+# this_input_data_stack <- prepare_input_data_kfold_buffer_grid_pca(occ_grid_path=occ_grid_path,
+#                                                                   clim_grid_path=clim_grid_path,
+#                                                                   buffer_grid_path=buffer_grid_path,
+#                                                                   number_of_folds=number_replicate,
+#                                                                   maxent_result_dir=all_path_stack$maxent_result_dir)
 ########################################
 # run MaxEnt                           #
 ########################################
@@ -1228,7 +1229,7 @@ this_model <- run_maxent_model_training_all_grid(maxent_evaluate_dir=all_path_st
                                                  all_x_full=this_input_data_stack$all_x_full,
                                                  all_pa=this_input_data_stack$all_pa,
                                                  maxent_result_path=all_path_stack$maxent_result_path,
-                                                 dir_sub_name="kfold_all_input",
+                                                 dir_sub_name= dir_sub_name,
                                                  maxent_model_dir=all_path_stack$maxent_model_dir,
                                                  model_saving=T)
 
@@ -1242,7 +1243,7 @@ rm(this_input_data_stack)
 
 pp_pca <- readRDS(paste(top_file_dir,"/",this_bug,"/result/kfold_input_data_pca",this_bug,".RDS",sep = ''))
 cv_models_path <- paste(top_file_dir,"/",this_bug,"/evaluate/cv_models.RDS",sep = '')
-this_model_path <- paste(top_file_dir,"/",this_bug,"/result/model/kfold_all_input_final_model_training_all.RDS",sep = '')
+this_model_path <- paste(all_path_stack$maxent_model_dir,'/',dir_sub_name,'_final_model_training_all.RDS',sep = '')
 cv_models <- readRDS(cv_models_path)
 this_model <- readRDS(this_model_path)
 # perform predictions on all the cv models
@@ -1255,7 +1256,7 @@ run_maxent_model_prediction_list_grid_pca(mod_list=cv_models,#cv_result_list$mod
 # perform predictions on the model trained with all input data
 run_maxent_model_prediction_basic_grid_pca(mod=this_model,
                                            grid_path_list=grid_path_list,
-                                           dir_sub_name="kfold_all_input",
+                                           dir_sub_name=dir_sub_name,
                                            pp_pca=pp_pca,
                                            maxent_raster_dir=all_path_stack$maxent_raster_dir)
 

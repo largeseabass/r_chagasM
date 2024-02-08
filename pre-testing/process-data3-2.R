@@ -803,9 +803,9 @@ run_maxent_model_prediction_list <- function(mod_list_path,clim,maxent_raster_di
 }
 
 
-this_bug = 'San'
+this_bug = 'Rec'
 number_replicate = 10
-top_file_dir = "/Users/liting/Documents/GitHub/r_chagasM/output/kfold_buffer_process"#"/Users/liting/Documents/GitHub/r_chagasM/output/kfold_process"
+top_file_dir = "/Users/liting/Documents/GitHub/r_chagasM/output/kfold_buffer_process"
 input_file_dir <-"/Users/liting/Documents/GitHub/r_chagasM"
 clim_dir <- "/Users/liting/Documents/data/resample_mask/historical/"
 shapefile_path <-paste(input_file_dir,"/masked_raster/shapefile.shp",sep = '')
@@ -872,7 +872,7 @@ this_model <- run_maxent_model_training_all(maxent_evaluate_dir=all_path_stack$m
 
 ##########################################
 # perform pca on all input raster stacks #
-# ##########################################
+##########################################
 # pca_model <- this_input_data_stack$pp_pca  # Assume pca_model is predefined
 # dir_resample_mask <- "/Users/liting/Documents/data/resample_mask"
 # # For historical data
@@ -896,9 +896,9 @@ this_model <- run_maxent_model_training_all(maxent_evaluate_dir=all_path_stack$m
 # process_raster_spatially(raster_stack_path=paste(dir_resample_mask,'/ssp585_2071_2100/',sep = ''), 
 #                          pca_model=pca_model, 
 #                          clim_type_name="ssp585_2071_2100")
-# 
-# 
-# 
-# 
-# 
-# 
+
+
+
+
+
+

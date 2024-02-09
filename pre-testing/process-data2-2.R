@@ -3,7 +3,7 @@ library('sf')
 library("rJava")
 library("raster")
 library("dismo")
-library("rgeos")
+#library("rgeos")
 library("knitr")
 library("rprojroot")
 library("caret")
@@ -1191,98 +1191,98 @@ run_maxent_kfold_cv_grid <- function(this_bug,number_replicate,top_file_dir,occ_
   
 }
 
-this_bug = 'Rec'
+bug_list <- list("Ger","Dim","Ind","Lec","Lon","Maz","Mex","Neo","Pro","Rub")
 number_replicate = 10
-dir_sub_name = "kfold_all_input"
-top_file_dir = "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/output/kfold_grid"
-occ_grid_path = paste("/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/cell/",this_bug,".csv",sep = '')
-clim_grid_path = "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/historical/5km.csv"
-buffer_grid_path = paste("/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/buffer/",this_bug,".csv",sep = '')
-
-#lc land cover, bc bioclimatic
-grid_path_list <- list("historical_all"="/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/historical/5km.csv",
-                       "ssp1_lc"="/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/ssp1/global_SSP1_RCP26_2085/5km.csv",
-                       "ssp1_bc"="/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/ssp1/ssp126_2071_2100/5km.csv",
-                       "ssp2_lc"="/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/ssp2/global_SSP2_RCP45_2085/5km.csv",
-                       "ssp2_bc"="/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/ssp2/ssp245_2071_2100/5km.csv",
-                       "ssp3_lc"="/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/ssp3/global_SSP3_RCP70_2085/5km.csv",
-                       "ssp3_bc"="/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/ssp3/ssp370_2071_2100/5km.csv",
-                       "ssp5_lc"="/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/ssp5/global_SSP5_RCP85_2085/5km.csv",
-                       "ssp5_bc"="/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/ssp5/ssp585_2071_2100/5km.csv")
-########################################
-# all the saving paths                 #
-########################################
-
-#/output folder saves all the output
-all_path_stack <- all_saving_paths(top_file_dir=top_file_dir,this_bug=this_bug)
-
-########################################
-#       prepare the data.              #
-########################################
-
-this_input_data_stack <- prepare_input_data_kfold_grid(occ_grid_path=occ_grid_path,
-                                                               clim_grid_path=clim_grid_path,
-                                                               number_of_folds=number_replicate,
-                                                               maxent_result_dir=all_path_stack$maxent_result_dir)
-# this_input_data_stack <- prepare_input_data_kfold_buffer_grid(occ_grid_path=occ_grid_path,
-#                                                               clim_grid_path=clim_grid_path,
-#                                                               buffer_grid_path=buffer_grid_path,
-#                                                               number_of_folds=number_replicate,
-#                                                               maxent_result_dir=all_path_stack$maxent_result_dir)
-########################################
-# run MaxEnt                           #
-########################################
-
-knitr::opts_knit$set(root.dir = '/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM')
-opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=TRUE)
-
-utils::download.file(url = "https://raw.githubusercontent.com/mrmaxent/Maxent/master/ArchivedReleases/3.4.3/maxent.jar",
-                     destfile = paste0(system.file("java", package = "dismo"),
-                                       "/maxent.jar"), mode = "wb")  ## wb for binary file, otherwise maxent.jar can not execute
-
-# perform cross-validation
-cv_result_list <- run_maxent_model_cv_grid(list_x_train_full=this_input_data_stack$list_x_train_full,
-                                           list_x_test_full=this_input_data_stack$list_x_test_full,
-                                           list_pa_train=this_input_data_stack$list_pa_train,
-                                           list_pa_test=this_input_data_stack$list_pa_test,
-                                           list_p_train=this_input_data_stack$list_p_train,
-                                           list_a_train=this_input_data_stack$list_a_train,
-                                           list_p_test=this_input_data_stack$list_p_test,
-                                           list_a_test=this_input_data_stack$list_a_test,
-                                           maxent_evaluate_dir=all_path_stack$maxent_evaluate_dir,
-                                           number_replicate=number_replicate,
-                                           maxent_model_dir=all_path_stack$maxent_model_dir,
-                                           metric_saving=T,
-                                           model_saving=T)
+dir_sub_name = "all_input"
 
 
-# train the model (for prediction)
-this_model <- run_maxent_model_training_all_grid(maxent_evaluate_dir=all_path_stack$maxent_evaluate_dir,
-                                                 all_x_full=this_input_data_stack$all_x_full,
-                                                 all_pa=this_input_data_stack$all_pa,
-                                                 maxent_result_path=all_path_stack$maxent_result_path,
-                                                 dir_sub_name=dir_sub_name,
-                                                 maxent_model_dir=all_path_stack$maxent_model_dir,
-                                                 model_saving=T)
-
-
-
-########################################
-# predictions              #
-########################################
-rm(this_input_data_stack)
-cv_result_list_path <- paste(top_file_dir,"/",this_bug,"/evaluate/cv_models.RDS",sep = '')
-this_model_path <- paste(all_path_stack$maxent_model_dir,'/',dir_sub_name,'_final_model_training_all.RDS',sep = '')
-# perform predictions on all the cv models
-run_maxent_model_prediction_list_grid(mod_list_path=cv_result_list_path,
-                                      grid_path_list=grid_path_list,
-                                      dir_sub_name='cross_validation',
-                                      number_replicate=number_replicate,
-                                      maxent_raster_dir=all_path_stack$maxent_raster_dir)
-# perform predictions on the model trained with all input data
-run_maxent_model_prediction_basic_grid(mod_path=this_model_path,
-                                       grid_path_list=grid_path_list,
-                                       dir_sub_name=dir_sub_name,
-                                       maxent_raster_dir=all_path_stack$maxent_raster_dir)
-
-#this_item <- readRDS("/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/output/kfold_buffer/San/evaluate/cv_metric_results.RDS")
+for (this_bug in bug_list){
+  top_file_dir = "/Users/liting/Documents/GitHub/r_chagasM/output/kfold_grid"#"/Users/liting/Documents/GitHub/r_chagasM/output/kfold_process"
+  input_file_dir <-"/Users/liting/Documents/GitHub/r_chagasM"
+  occ_grid_path = paste(input_file_dir,"/cell/",this_bug,".csv",sep = '')
+  clim_grid_path = paste(input_file_dir,"/bioclimatic/historical/5km.csv",sep = '')
+  buffer_grid_path = paste(input_file_dir,"/buffer/",this_bug,".csv",sep = '')
+  
+  #lc land cover, bc bioclimatic
+  grid_path_list <- list("historical_all"=paste(input_file_dir,"/bioclimatic/historical/5km.csv",this_bug,".csv",sep = ''),
+                         "ssp1_lc"=paste(input_file_dir,"/bioclimatic/ssp1/global_SSP1_RCP26_2085/5km.csv",sep = ''),
+                         "ssp1_bc"=paste(input_file_dir,"/bioclimatic/ssp1/ssp126_2071_2100/5km.csv",sep = ''),
+                         "ssp2_lc"=paste(input_file_dir,"/bioclimatic/ssp2/global_SSP2_RCP45_2085/5km.csv",sep = ''),
+                         "ssp2_bc"=paste(input_file_dir,"/bioclimatic/ssp2/ssp245_2071_2100/5km.csv",sep = ''),
+                         "ssp3_lc"=paste(input_file_dir,"/bioclimatic/ssp3/global_SSP3_RCP70_2085/5km.csv",sep = ''),
+                         "ssp3_bc"=paste(input_file_dir,"/bioclimatic/ssp3/ssp370_2071_2100/5km.csv",sep = ''),
+                         "ssp5_lc"=paste(input_file_dir,"/bioclimatic/ssp5/global_SSP5_RCP85_2085/5km.csv",sep = ''),
+                         "ssp5_bc"=paste(input_file_dir,"/bioclimatic/ssp5/ssp585_2071_2100/5km.csv",sep = ''))
+  
+  ########################################
+  # all the saving paths                 #
+  ########################################
+  
+  #/output folder saves all the output
+  all_path_stack <- all_saving_paths(top_file_dir=top_file_dir,this_bug=this_bug)
+  
+  ########################################
+  #       prepare the data.              #
+  ########################################
+  
+  this_input_data_stack <- prepare_input_data_kfold_grid(occ_grid_path=occ_grid_path,
+                                                                 clim_grid_path=clim_grid_path,
+                                                                 number_of_folds=number_replicate,
+                                                                 maxent_result_dir=all_path_stack$maxent_result_dir)
+  # this_input_data_stack <- prepare_input_data_kfold_buffer_grid(occ_grid_path=occ_grid_path,
+  #                                                               clim_grid_path=clim_grid_path,
+  #                                                               buffer_grid_path=buffer_grid_path,
+  #                                                               number_of_folds=number_replicate,
+  #                                                               maxent_result_dir=all_path_stack$maxent_result_dir)
+  # ########################################
+  # run MaxEnt                           #
+  ########################################
+  
+  # perform cross-validation
+  cv_result_list <- run_maxent_model_cv_grid(list_x_train_full=this_input_data_stack$list_x_train_full,
+                                             list_x_test_full=this_input_data_stack$list_x_test_full,
+                                             list_pa_train=this_input_data_stack$list_pa_train,
+                                             list_pa_test=this_input_data_stack$list_pa_test,
+                                             list_p_train=this_input_data_stack$list_p_train,
+                                             list_a_train=this_input_data_stack$list_a_train,
+                                             list_p_test=this_input_data_stack$list_p_test,
+                                             list_a_test=this_input_data_stack$list_a_test,
+                                             maxent_evaluate_dir=all_path_stack$maxent_evaluate_dir,
+                                             number_replicate=number_replicate,
+                                             maxent_model_dir=all_path_stack$maxent_model_dir,
+                                             metric_saving=T,
+                                             model_saving=T)
+  
+  
+  # train the model (for prediction)
+  this_model <- run_maxent_model_training_all_grid(maxent_evaluate_dir=all_path_stack$maxent_evaluate_dir,
+                                                   all_x_full=this_input_data_stack$all_x_full,
+                                                   all_pa=this_input_data_stack$all_pa,
+                                                   maxent_result_path=all_path_stack$maxent_result_path,
+                                                   dir_sub_name=dir_sub_name,
+                                                   maxent_model_dir=all_path_stack$maxent_model_dir,
+                                                   model_saving=T)
+  
+  
+  
+  ########################################
+  # predictions              #
+  ########################################
+  # rm(this_input_data_stack)
+  # cv_result_list_path <- paste(top_file_dir,"/",this_bug,"/evaluate/cv_models.RDS",sep = '')
+  # this_model_path <- paste(all_path_stack$maxent_model_dir,'/',dir_sub_name,'_final_model_training_all.RDS',sep = '')
+  # # perform predictions on all the cv models
+  # run_maxent_model_prediction_list_grid(mod_list_path=cv_result_list_path,
+  #                                       grid_path_list=grid_path_list,
+  #                                       dir_sub_name='cross_validation',
+  #                                       number_replicate=number_replicate,
+  #                                       maxent_raster_dir=all_path_stack$maxent_raster_dir)
+  # # perform predictions on the model trained with all input data
+  # run_maxent_model_prediction_basic_grid(mod_path=this_model_path,
+  #                                        grid_path_list=grid_path_list,
+  #                                        dir_sub_name=dir_sub_name,
+  #                                        maxent_raster_dir=all_path_stack$maxent_raster_dir)
+  # 
+  #this_item <- readRDS("/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/output/kfold_buffer/San/evaluate/cv_metric_results.RDS")
+  
+}

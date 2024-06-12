@@ -253,7 +253,7 @@ run_maxent_kfold_buffer_cv <- function(this_bug,number_replicate,top_file_dir){
   
 }
 
-bug_list <- list("Dim","Ind","Lec","Lon","Maz","Mex","Neo","Pro","Rub")
+bug_list <- list("San")# ,"Ger","Rec","Dim","Ind","Lec","Lon","Maz","Mex","Neo","Pro","Rub"
 number_replicate <- 10
 dir_sub_name <- "all_input"
 top_file_dir <- "/Users/liting/Documents/GitHub/r_chagasM/output/kfold_buffer"
@@ -314,42 +314,27 @@ for (this_bug in bug_list){
   ########################################
   # predictions              #
   # ########################################
-  # 
-  # 
-  # dir_resample_mask <- "/Users/vivianhuang/desktop/resample_mask"
-  # 
-  # cv_result_list_path <- paste(all_path_stack$maxent_evaluate_dir,'/cv_models.RDS',sep = '')
-  # this_model_path <- paste(all_path_stack$maxent_evaluate_dir,'/',dir_sub_name,'_final_model_training_all.RDS',sep = '')
-  # # perform predictions on all the cv models
-  # rm(this_input_data_stack)
-  # 
+
+
+  dir_resample_mask <- "/Users/liting/Documents/data/resample_mask"
+
+  cv_result_list_path <- paste(all_path_stack$maxent_evaluate_dir,'/cv_models.RDS',sep = '')
+  this_model_path <- paste(all_path_stack$maxent_model_dir,'/',dir_sub_name,'_final_model_training_all.RDS',sep = '')
+  # perform predictions on all the cv models
+  rm(this_input_data_stack)
+
   # run_maxent_model_prediction_list(mod_list_path=cv_result_list_path,#cv_result_list$model_list,
   #                                  clim=clim_dir,
   #                                  maxent_raster_dir=all_path_stack$maxent_raster_dir,
   #                                  dir_resample_mask=dir_resample_mask,
   #                                  dir_sub_name='cross_validation',
   #                                  number_replicate=number_replicate)
-  # 
-  # # perform predictions on the model trained with all input data
-  # run_maxent_model_prediction_basic(mod_path=this_model_path,
-  #                                   clim=clim_dir,
-  #                                   maxent_raster_dir=all_path_stack$maxent_raster_dir,
-  #                                   dir_resample_mask=dir_resample_mask,
-  #                                   dir_sub_name=dir_sub_name)
-  # 
-  # # run_maxent_kfold_buffer_cv(this_bug = this_bug, number_replicate = number_replicate,top_file_dir = "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/output/kfold_buffer")
-  # # 
-  # # run_maxent_kfold_cv(this_bug = this_bug, number_replicate = number_replicate,top_file_dir = "/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/output/kfold")
-  # 
-  # 
-  # # inspect_results <- readRDS("/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/output/kfold_buffer/San/result/kfold_buffer_input_data_San.RDS")
-  # # 
-  # # 
-  # # this_inspect_row <- as.data.frame(inspect_results$all_p)
-  # # this_inspect_index <- unique(which(is.na(as.data.frame(inspect_results$all_p)), arr.ind=TRUE)[,1])
-  # # 
-  # # cat("\nRows with NA values are removed. Row indexs:",this_inspect_index)
-  # # cat("\nRows with NA values are removed. Rows:")
-  # # print(this_inspect_row[this_inspect_index,])
-  # # after_delete <- this_inspect_row[-this_inspect_index,]
+
+  # perform predictions on the model trained with all input data
+  run_maxent_model_prediction_basic(mod_path=this_model_path,
+                                    clim=clim_dir,
+                                    maxent_raster_dir=all_path_stack$maxent_raster_dir,
+                                    dir_resample_mask=dir_resample_mask,
+                                    dir_sub_name=dir_sub_name)
+
 }

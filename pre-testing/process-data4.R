@@ -1157,28 +1157,28 @@ run_maxent_kfold_cv_grid_pca <- function(this_bug,number_replicate,top_file_dir,
 
 overall_startTime <- Sys.time()
 
-bug_list <- list("Ger","Dim","Ind","Lec","Lon","Maz","Mex","Neo","Pro","Rub")
+bug_list = list('San',"Ger","Dim","Ind","Lec","Lon","Maz","Mex","Neo","Pro","Rec","Rub")
 number_replicate = 10
-dir_sub_name = "all_input"
+
 
 
 for (this_bug in bug_list){
-  top_file_dir = "/Users/liting/Documents/GitHub/r_chagasM/output/kfold_grid_process"#"/Users/liting/Documents/GitHub/r_chagasM/output/kfold_process"
+  top_file_dir = "/Users/liting/Documents/GitHub/r_chagasM/output/grid_nobuffer_on"#"/Users/liting/Documents/GitHub/r_chagasM/output/kfold_process"
   input_file_dir <-"/Users/liting/Documents/GitHub/r_chagasM"
   occ_grid_path = paste(input_file_dir,"/cell/",this_bug,".csv",sep = '')
   clim_grid_path = paste(input_file_dir,"/bioclimatic/historical/5km.csv",sep = '')
   buffer_grid_path = paste(input_file_dir,"/buffer/",this_bug,".csv",sep = '')
   
   #lc land cover, bc bioclimatic
-  grid_path_list <- list("historical_all"="/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/historical/5km.csv",
-                         "ssp1_lc"="/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/ssp1/global_SSP1_RCP26_2085/5km.csv",
-                         "ssp1_bc"="/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/ssp1/ssp126_2071_2100/5km.csv",
-                         "ssp2_lc"="/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/ssp2/global_SSP2_RCP45_2085/5km.csv",
-                         "ssp2_bc"="/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/ssp2/ssp245_2071_2100/5km.csv",
-                         "ssp3_lc"="/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/ssp3/global_SSP3_RCP70_2085/5km.csv",
-                         "ssp3_bc"="/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/ssp3/ssp370_2071_2100/5km.csv",
-                         "ssp5_lc"="/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/ssp5/global_SSP5_RCP85_2085/5km.csv",
-                         "ssp5_bc"="/Users/vivianhuang/Desktop/R-modeling-scripts/r_chagasM/bioclimatic/ssp5/ssp585_2071_2100/5km.csv")
+  grid_path_list <- list("historical_all"=paste(input_file_dir,"/bioclimatic/historical/5km.csv",sep = ''),
+                         "ssp1_lc"=paste(input_file_dir,"/bioclimatic/ssp1/global_SSP1_RCP26_2085/5km.csv",sep = ''),
+                         "ssp1_bc"=paste(input_file_dir,"/bioclimatic/ssp1/ssp126_2071_2100/5km.csv",sep = ''),
+                         "ssp2_lc"=paste(input_file_dir,"/bioclimatic/ssp2/global_SSP2_RCP45_2085/5km.csv",sep = ''),
+                         "ssp2_bc"=paste(input_file_dir,"/bioclimatic/ssp2/ssp245_2071_2100/5km.csv",sep = ''),
+                         "ssp3_lc"=paste(input_file_dir,"/bioclimatic/ssp3/global_SSP3_RCP70_2085/5km.csv",sep = ''),
+                         "ssp3_bc"=paste(input_file_dir,"/bioclimatic/ssp3/ssp370_2071_2100/5km.csv",sep = ''),
+                         "ssp5_lc"=paste(input_file_dir,"/bioclimatic/ssp5/global_SSP5_RCP85_2085/5km.csv",sep = ''),
+                         "ssp5_bc"=paste(input_file_dir,"/bioclimatic/ssp5/ssp585_2071_2100/5km.csv",sep = ''))
   ########################################
   # all the saving paths                 #
   ########################################
@@ -1226,7 +1226,7 @@ for (this_bug in bug_list){
                                                    all_x_full=this_input_data_stack$all_x_full,
                                                    all_pa=this_input_data_stack$all_pa,
                                                    maxent_result_path=all_path_stack$maxent_result_path,
-                                                   dir_sub_name= dir_sub_name,
+                                                   dir_sub_name= "all_input",
                                                    maxent_model_dir=all_path_stack$maxent_model_dir,
                                                    model_saving=T)
   

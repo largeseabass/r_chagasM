@@ -1191,13 +1191,13 @@ run_maxent_kfold_cv_grid <- function(this_bug,number_replicate,top_file_dir,occ_
   
 }
 
-bug_list <- list("Ger","Dim","Ind","Lec","Lon","Maz","Mex","Neo","Pro","Rub")
+bug_list <- list("San","Ger","Rec","Dim","Ind","Lec","Lon","Maz","Mex","Neo","Pro","Rub")
 number_replicate = 10
-dir_sub_name = "all_input"
+
 
 
 for (this_bug in bug_list){
-  top_file_dir = "/Users/liting/Documents/GitHub/r_chagasM/output/kfold_grid"#"/Users/liting/Documents/GitHub/r_chagasM/output/kfold_process"
+  top_file_dir = "/Users/liting/Documents/GitHub/r_chagasM/output/grid_buffer_off"
   input_file_dir <-"/Users/liting/Documents/GitHub/r_chagasM"
   occ_grid_path = paste(input_file_dir,"/cell/",this_bug,".csv",sep = '')
   clim_grid_path = paste(input_file_dir,"/bioclimatic/historical/5km.csv",sep = '')
@@ -1225,16 +1225,16 @@ for (this_bug in bug_list){
   #       prepare the data.              #
   ########################################
   
-  this_input_data_stack <- prepare_input_data_kfold_grid(occ_grid_path=occ_grid_path,
-                                                                 clim_grid_path=clim_grid_path,
-                                                                 number_of_folds=number_replicate,
-                                                                 maxent_result_dir=all_path_stack$maxent_result_dir)
-  # this_input_data_stack <- prepare_input_data_kfold_buffer_grid(occ_grid_path=occ_grid_path,
-  #                                                               clim_grid_path=clim_grid_path,
-  #                                                               buffer_grid_path=buffer_grid_path,
-  #                                                               number_of_folds=number_replicate,
-  #                                                               maxent_result_dir=all_path_stack$maxent_result_dir)
-  # ########################################
+  # this_input_data_stack <- prepare_input_data_kfold_grid(occ_grid_path=occ_grid_path,
+  #                                                                clim_grid_path=clim_grid_path,
+  #                                                                number_of_folds=number_replicate,
+  #                                                                maxent_result_dir=all_path_stack$maxent_result_dir)
+  this_input_data_stack <- prepare_input_data_kfold_buffer_grid(occ_grid_path=occ_grid_path,
+                                                                clim_grid_path=clim_grid_path,
+                                                                buffer_grid_path=buffer_grid_path,
+                                                                number_of_folds=number_replicate,
+                                                                maxent_result_dir=all_path_stack$maxent_result_dir)
+  ########################################
   # run MaxEnt                           #
   ########################################
   
@@ -1259,7 +1259,7 @@ for (this_bug in bug_list){
                                                    all_x_full=this_input_data_stack$all_x_full,
                                                    all_pa=this_input_data_stack$all_pa,
                                                    maxent_result_path=all_path_stack$maxent_result_path,
-                                                   dir_sub_name=dir_sub_name,
+                                                   dir_sub_name="all_input",
                                                    maxent_model_dir=all_path_stack$maxent_model_dir,
                                                    model_saving=T)
   

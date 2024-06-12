@@ -3,7 +3,6 @@ library('sf')
 library("rJava")
 library("raster")
 library("dismo")
-# library("rgeos")
 library("knitr")
 library("rprojroot")
 library("caret")
@@ -129,7 +128,7 @@ prepare_input_data_kfold_pca <- function(occ_raw_path,clim_dir,number_of_folds,m
   #read occurrence data
   occ_raw <- read.csv(occ_raw_path)
   
-  occ_only<- occ_raw[,c('DecimalLon',"DecimalLat")]
+  occ_only<- occ_raw[,c('DecimalLongitude',"DecimalLatitude")]
   colnames(occ_only) <- c('longitudes',"latitudes")
   coordinates(occ_only) <- ~longitudes + latitudes
   
@@ -313,7 +312,7 @@ prepare_input_data_kfold_buffer_pca <- function(occ_raw_path,clim_dir,number_of_
   #read occurence data
   occ_raw <- read.csv(occ_raw_path)
   
-  occ_only<- occ_raw[,c('DecimalLon',"DecimalLat")]
+  occ_only<- occ_raw[,c('DecimalLongitude',"DecimalLatitude")]
   colnames(occ_only) <- c('longitudes',"latitudes")
   coordinates(occ_only) <- ~longitudes + latitudes
   
@@ -803,102 +802,106 @@ run_maxent_model_prediction_list <- function(mod_list_path,clim,maxent_raster_di
 }
 
 
-this_bug = 'San'
+bug_list = list("Lon","Maz","Mex","Neo","Pro","Rec","Rub")
 number_replicate = 10
-top_file_dir = "/Users/liting/Documents/GitHub/r_chagasM/output/kfold_buffer_process"#"/Users/liting/Documents/GitHub/r_chagasM/output/kfold_process"
+top_file_dir = "/Users/liting/Documents/GitHub/r_chagasM/output/pixel_nobuffer_on"
 input_file_dir <-"/Users/liting/Documents/GitHub/r_chagasM"
 clim_dir <- "/Users/liting/Documents/data/resample_mask/historical/"
 shapefile_path <-paste(input_file_dir,"/masked_raster/shapefile.shp",sep = '')
 
-########################################
-# all the saving paths                 #
-########################################
+for (this_bug in bug_list){
+  
+  ########################################
+  # all the saving paths                 #
+  ########################################
+  
+  #read the occurence
+  occ_raw_path <- paste(input_file_dir,"/data/",this_bug,'.csv',sep = '')
+  #/output folder saves all the output
+  all_path_stack <- all_saving_paths(top_file_dir=top_file_dir,this_bug=this_bug)
+  
+  # Here
+  this_input_data_stack <- prepare_input_data_kfold_pca(occ_raw_path=occ_raw_path,
+                                                        clim_dir=clim_dir,
+                                                        number_of_folds=number_replicate,
+                                                        maxent_result_dir=all_path_stack$maxent_result_dir)
 
-#read the occurence
-occ_raw_path <- paste(input_file_dir,"/data/",this_bug,'.csv',sep = '')
-#/output folder saves all the output
-all_path_stack <- all_saving_paths(top_file_dir=top_file_dir,this_bug=this_bug)
-
-# Here
-# this_input_data_stack <- prepare_input_data_kfold_pca(occ_raw_path=occ_raw_path,
-#                                                       clim_dir=clim_dir,
-#                                                       number_of_folds=number_replicate,
-#                                                       maxent_result_dir=all_path_stack$maxent_result_dir)
-
-this_input_data_stack <- prepare_input_data_kfold_buffer_pca(occ_raw_path=occ_raw_path,
-                                                             clim_dir=clim_dir,
-                                                             number_of_folds=number_replicate,
-                                                             shapefile_path=shapefile_path,
-                                                             maxent_result_dir=all_path_stack$maxent_result_dir,
-                                                             buff_width = 55555)
-
-########################################
-# run MaxEnt                           #
-########################################
-
-utils::download.file(url = "https://raw.githubusercontent.com/mrmaxent/Maxent/master/ArchivedReleases/3.4.3/maxent.jar",
-                     destfile = paste0(system.file("java", package = "dismo"),
-                                       "/maxent.jar"), mode = "wb")  
-## wb for binary file, otherwise maxent.jar can not execute
-## Make sure we are using thes same MaxEnt function.
-
-
-# perform cross-validation
-cv_result_list <- run_maxent_model_cv(list_x_train_full=this_input_data_stack$list_x_train_full,
-                                      list_x_test_full=this_input_data_stack$list_x_test_full,
-                                      list_pa_train=this_input_data_stack$list_pa_train,
-                                      list_pa_test=this_input_data_stack$list_pa_test,
-                                      list_p_train=this_input_data_stack$list_p_train,
-                                      list_a_train=this_input_data_stack$list_a_train,
-                                      list_p_test=this_input_data_stack$list_p_test,
-                                      list_a_test=this_input_data_stack$list_a_test,
-                                      maxent_evaluate_dir=all_path_stack$maxent_evaluate_dir,
-                                      number_replicate=number_replicate,
-                                      maxent_model_dir=all_path_stack$maxent_model_dir,
-                                      metric_saving=T,
-                                      model_saving=T)
-
-
-# train the model (for prediction)
-this_model <- run_maxent_model_training_all(maxent_evaluate_dir=all_path_stack$maxent_evaluate_dir,
-                                            all_x_full=this_input_data_stack$all_x_full,
-                                            all_pa=this_input_data_stack$all_pa,
-                                            maxent_result_path=all_path_stack$maxent_result_path,
-                                            dir_sub_name="all_input",
-                                            maxent_model_dir=all_path_stack$maxent_model_dir,
-                                            model_saving=T)
-
-
-
-##########################################
-# perform pca on all input raster stacks #
-# ##########################################
-# pca_model <- this_input_data_stack$pp_pca  # Assume pca_model is predefined
-# dir_resample_mask <- "/Users/liting/Documents/data/resample_mask"
-# # For historical data
-# process_raster_spatially(raster_stack_path=clim_dir, 
-#                          pca_model=pca_model, 
-#                          clim_type_name="historical")
-# # For SSP1
-# 
-# process_raster_spatially(raster_stack_path=paste(dir_resample_mask,'/ssp126_2071_2100/',sep = ''), 
-#                          pca_model=pca_model, 
-#                          clim_type_name="ssp126_2071_2100")
-# # For SSP2
-# process_raster_spatially(raster_stack_path=paste(dir_resample_mask,'/ssp245_2071_2100/',sep = ''), 
-#                          pca_model=pca_model, 
-#                          clim_type_name="ssp245_2071_2100")
-# # For SSP3
-# process_raster_spatially(raster_stack_path=paste(dir_resample_mask,'/ssp370_2071_2100/',sep = ''), 
-#                          pca_model=pca_model, 
-#                          clim_type_name="ssp370_2071_2100")
-# # For SSP5
-# process_raster_spatially(raster_stack_path=paste(dir_resample_mask,'/ssp585_2071_2100/',sep = ''), 
-#                          pca_model=pca_model, 
-#                          clim_type_name="ssp585_2071_2100")
-# 
-# 
-# 
-# 
-# 
-# 
+  # this_input_data_stack <- prepare_input_data_kfold_buffer_pca(occ_raw_path=occ_raw_path,
+  #                                                              clim_dir=clim_dir,
+  #                                                              number_of_folds=number_replicate,
+  #                                                              shapefile_path=shapefile_path,
+  #                                                              maxent_result_dir=all_path_stack$maxent_result_dir,
+  #                                                              buff_width = 55555)
+  
+  ########################################
+  # run MaxEnt                           #
+  ########################################
+  
+  utils::download.file(url = "https://raw.githubusercontent.com/mrmaxent/Maxent/master/ArchivedReleases/3.4.3/maxent.jar",
+                       destfile = paste0(system.file("java", package = "dismo"),
+                                         "/maxent.jar"), mode = "wb")  
+  ## wb for binary file, otherwise maxent.jar can not execute
+  ## Make sure we are using thes same MaxEnt function.
+  
+  
+  # perform cross-validation
+  cv_result_list <- run_maxent_model_cv(list_x_train_full=this_input_data_stack$list_x_train_full,
+                                        list_x_test_full=this_input_data_stack$list_x_test_full,
+                                        list_pa_train=this_input_data_stack$list_pa_train,
+                                        list_pa_test=this_input_data_stack$list_pa_test,
+                                        list_p_train=this_input_data_stack$list_p_train,
+                                        list_a_train=this_input_data_stack$list_a_train,
+                                        list_p_test=this_input_data_stack$list_p_test,
+                                        list_a_test=this_input_data_stack$list_a_test,
+                                        maxent_evaluate_dir=all_path_stack$maxent_evaluate_dir,
+                                        number_replicate=number_replicate,
+                                        maxent_model_dir=all_path_stack$maxent_model_dir,
+                                        metric_saving=T,
+                                        model_saving=T)
+  
+  
+  # train the model (for prediction)
+  this_model <- run_maxent_model_training_all(maxent_evaluate_dir=all_path_stack$maxent_evaluate_dir,
+                                              all_x_full=this_input_data_stack$all_x_full,
+                                              all_pa=this_input_data_stack$all_pa,
+                                              maxent_result_path=all_path_stack$maxent_result_path,
+                                              dir_sub_name="all_input",
+                                              maxent_model_dir=all_path_stack$maxent_model_dir,
+                                              model_saving=T)
+  
+  
+  
+  ##########################################
+  # perform pca on all input raster stacks #
+  # ##########################################
+  # pca_model <- this_input_data_stack$pp_pca  # Assume pca_model is predefined
+  # dir_resample_mask <- "/Users/liting/Documents/data/resample_mask"
+  # # For historical data
+  # process_raster_spatially(raster_stack_path=clim_dir, 
+  #                          pca_model=pca_model, 
+  #                          clim_type_name="historical")
+  # # For SSP1
+  # 
+  # process_raster_spatially(raster_stack_path=paste(dir_resample_mask,'/ssp126_2071_2100/',sep = ''), 
+  #                          pca_model=pca_model, 
+  #                          clim_type_name="ssp126_2071_2100")
+  # # For SSP2
+  # process_raster_spatially(raster_stack_path=paste(dir_resample_mask,'/ssp245_2071_2100/',sep = ''), 
+  #                          pca_model=pca_model, 
+  #                          clim_type_name="ssp245_2071_2100")
+  # # For SSP3
+  # process_raster_spatially(raster_stack_path=paste(dir_resample_mask,'/ssp370_2071_2100/',sep = ''), 
+  #                          pca_model=pca_model, 
+  #                          clim_type_name="ssp370_2071_2100")
+  # # For SSP5
+  # process_raster_spatially(raster_stack_path=paste(dir_resample_mask,'/ssp585_2071_2100/',sep = ''), 
+  #                          pca_model=pca_model, 
+  #                          clim_type_name="ssp585_2071_2100")
+  # 
+  # 
+  # 
+  # 
+  # 
+  # 
+  
+}

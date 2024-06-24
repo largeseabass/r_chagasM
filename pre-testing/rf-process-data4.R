@@ -422,7 +422,7 @@ run_rf_model_prediction_basic <- function(mod_path,clim_dir,ml_raster_dir,dir_re
 # The Actual Run.                      #
 ########################################
 
-bug_list <- list("Lec","Lon","Maz","Mex")#,"Neo","Pro","Rub")
+bug_list <- list("Neo","Pro","Rub")
 number_replicate <- 10
 top_file_dir <- "/Users/liting/Documents/GitHub/r_chagasM/output/rf/pixel_buffer_off" # add an rf layer
 species_input_dir <-"/Users/liting/Documents/GitHub/r_chagasM/output/pixel_buffer_off"

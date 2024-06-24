@@ -422,7 +422,7 @@ run_rf_model_prediction_basic <- function(mod_path,clim_dir,ml_raster_dir,dir_re
 # The Actual Run.                      #
 ########################################
 
-bug_list <- list("Lec","Lon","Maz","Mex")#,"Neo","Pro","Rub")
+bug_list <- list("Ger","Rec","Dim","Ind")#,"Lec","Lon","Maz","Mex","Neo","Pro","Rub")
 number_replicate <- 10
 top_file_dir <- "/Users/liting/Documents/GitHub/r_chagasM/output/rf/pixel_buffer_off" # add an rf layer
 species_input_dir <-"/Users/liting/Documents/GitHub/r_chagasM/output/pixel_buffer_off"
@@ -439,30 +439,30 @@ for (this_bug in bug_list){
   # 3 RF run_rf_model_cv
   # perform cross-validation
   cv_result_list <- run_rf_model_cv(list_x_train_full=this_input_data_stack$list_x_train_full,
-                                    list_x_test_full=this_input_data_stack$list_x_test_full,
-                                    list_pa_train=this_input_data_stack$list_pa_train,
-                                    list_pa_test=this_input_data_stack$list_pa_test,
-                                    list_p_train=this_input_data_stack$list_p_train,
-                                    list_a_train=this_input_data_stack$list_a_train,
-                                    list_p_test=this_input_data_stack$list_p_test,
-                                    list_a_test=this_input_data_stack$list_a_test,
-                                    ml_evaluate_dir=all_path_stack$ml_evaluate_dir,
-                                    number_replicate=number_replicate,
-                                    ml_model_dir=all_path_stack$ml_model_dir,
-                                    metric_saving=T,
-                                    model_saving=T)
-  
+                                        list_x_test_full=this_input_data_stack$list_x_test_full,
+                                        list_pa_train=this_input_data_stack$list_pa_train,
+                                        list_pa_test=this_input_data_stack$list_pa_test,
+                                        list_p_train=this_input_data_stack$list_p_train,
+                                        list_a_train=this_input_data_stack$list_a_train,
+                                        list_p_test=this_input_data_stack$list_p_test,
+                                        list_a_test=this_input_data_stack$list_a_test,
+                                        ml_evaluate_dir=all_path_stack$ml_evaluate_dir,
+                                        number_replicate=number_replicate,
+                                        ml_model_dir=all_path_stack$ml_model_dir,
+                                        metric_saving=T,
+                                        model_saving=T)
+
   # 4 RF run_rf_model_training_all
   # train the model (for prediction)
   this_model <- run_rf_model_training_all(ml_evaluate_dir=all_path_stack$ml_evaluate_dir,
-                                          all_x_full= this_input_data_stack$all_x_full,
-                                          all_pa= this_input_data_stack$all_pa,
-                                          ml_result_path=all_path_stack$ml_result_path,
-                                          dir_sub_name="all_input",
-                                          ml_model_dir=all_path_stack$ml_model_dir,
-                                          model_saving=T)
-  
-  
+                                              all_x_full= this_input_data_stack$all_x_full,
+                                              all_pa= this_input_data_stack$all_pa,
+                                              ml_result_path=all_path_stack$ml_result_path,
+                                              dir_sub_name="all_input",
+                                              ml_model_dir=all_path_stack$ml_model_dir,
+                                              model_saving=T)
+
+
   # 5 run_rf_model_prediction_basic
   
   dir_resample_mask <- "/Users/liting/Documents/data/resample_mask"

@@ -7,6 +7,19 @@ library("knitr")
 library("rprojroot")
 library("caret")
 library("Metrics")
+run_maxent_model_prediction_single <- function(mod,this_item_name,clim_dir,maxent_raster_dir_this){
+  startTime <- Sys.time()
+  print(this_item_name)
+  print(clim_dir)
+  clim_list <- list.files(clim_dir, pattern = '.tif$', full.names = T)  # '..' leads to the path above the folder where the .rmd file is located
+  clim <- raster::stack(clim_list)
+  print("make prediction")
+  ped <- predict(mod,clim)
+  save_raster_path <- paste(maxent_raster_dir_this,"/",this_item_name,"_",this_bug,'.tif',sep = '')
+  writeRaster(ped, filename =save_raster_path, format = "GTiff",overwrite=TRUE)
+  endTime <- Sys.time()
+  print(endTime-startTime)
+}
 
 run_maxent_model_prediction_basic <- function(mod_path,clim_dir,maxent_raster_dir,dir_resample_mask,dir_sub_name){
   # take one trained maxent model
@@ -80,7 +93,7 @@ run_maxent_model_prediction_basic <- function(mod_path,clim_dir,maxent_raster_di
 # The Actual Run.                      #
 ########################################
 
-bug_list <- list("San","Ger","Rec","Dim","Ind","Lec","Lon","Maz","Mex","Neo","Pro","Rub")
+bug_list <- list("Ger","Rec","Dim")#"San",
 number_replicate <- 10
 top_file_dir <- "/Users/liting/Documents/GitHub/r_chagasM/output/pixel_buffer_off"
 input_file_dir <-"/Users/liting/Documents/GitHub/r_chagasM"
@@ -109,6 +122,6 @@ for (this_bug in bug_list){
                                     clim=clim_dir,
                                     maxent_raster_dir=paste(top_file_dir,'/',this_bug,'/result/output_raster',sep = ''),
                                     dir_resample_mask=dir_resample_mask,
-                                    dir_sub_name=dir_sub_name)
+                                    dir_sub_name="all_input")
 
 }

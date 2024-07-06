@@ -151,7 +151,7 @@ run_maxent_model_prediction_basic_ssp5only<- function(mod_path,clim_dir,maxent_r
   ########################################
   
   run_maxent_model_prediction_single(mod=mod,
-                                     this_item_name=paste("ssp585_predict","_allinput_revise",sep = ''),
+                                     this_item_name=paste("ssp585_predict","_allinput",sep = ''),
                                      clim_dir = dir_resample_mask_ssp5,
                                      maxent_raster_dir_this=maxent_raster_dir_this)
   
@@ -163,7 +163,7 @@ run_maxent_model_prediction_basic_ssp5only<- function(mod_path,clim_dir,maxent_r
 # The Actual Run.                      #
 ########################################
 
-bug_list <- list("Ger","Lec","Ind")#"San",
+bug_list <- list('San',"Ger","Dim","Ind")
 number_replicate <- 10
 top_file_dir <- "/Users/liting/Documents/GitHub/r_chagasM/output/pixel_buffer_off"
 input_file_dir <-"/Users/liting/Documents/GitHub/r_chagasM"

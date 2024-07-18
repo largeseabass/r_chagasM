@@ -3,6 +3,8 @@
 /masked_raster
 /buffer
 /cell
+/new_buffer
+/new_cell
 /bioclimatic
 /grid
 .Rproj.user

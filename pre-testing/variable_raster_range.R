@@ -39,4 +39,4 @@ for (folder in folders) {
 }
 
 
-write.csv(results, "/Users/liting/Documents/GitHub/r_chagasM/output/figures/raster_ranges.csv", row.names = FALSE)
+write.csv(results_df, "/Users/liting/Documents/GitHub/r_chagasM/output/figures/raster_ranges.csv")

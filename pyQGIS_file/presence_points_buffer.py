@@ -5,11 +5,11 @@ import os
 import sys
 import os.path
 
+# detailed steps could be found at https://github.com/largeseabass/KissingBugsRf
 # todo: change the path
-env = {'MallocNanoZone': '1', 'USER': 'vivianhuang', 'COMMAND_MODE': 'unix2003', '__CFBundleIdentifier': 'org.qgis.qgis3', 'PATH': '/usr/bin:/bin:/usr/sbin:/sbin', 'LOGNAME': 'vivianhuang', 'SSH_AUTH_SOCK': '/private/tmp/com.apple.launchd.sGOU34JwDH/Listeners', 'PYQGIS_STARTUP': 'pyqgis-startup.py', 'HOME': '/Users/vivianhuang', 'MallocSpaceEfficient': '1', 'SHELL': '/bin/zsh', 'EXTENSION_KIT_EXTENSION_TYPE': '2', 'TMPDIR': '/var/folders/rl/b_rhkl_n5bn9m_27ts9r5rjc0000gn/T/', '__CF_USER_TEXT_ENCODING': '0x1F5:0x0:0x0', 'QT_AUTO_SCREEN_SCALE_FACTOR': '1', 'XPC_SERVICE_NAME': 'application.org.qgis.qgis3.2168055.2169234', 'XPC_FLAGS': '0x0', 'QT3D_RENDERER': 'opengl', 'GDAL_DRIVER_PATH': '/Applications/QGIS-LTR.app/Contents/MacOS/lib/gdalplugins', 'GDAL_DATA': '/Applications/QGIS-LTR.app/Contents/Resources/gdal', 'PYTHONHOME': '/Applications/QGIS-LTR.app/Contents/MacOS', 'GDAL_PAM_PROXY_DIR': '/Users/vivianhuang/Library/Application Support/QGIS/QGIS3/profiles/default/gdal_pam/', 'GISBASE': '/Applications/QGIS-LTR.app/Contents/MacOS/grass', 'GRASS_PAGER': 'cat', 'LC_CTYPE': 'UTF-8', 'SSL_CERT_DIR': '/Applications/QGIS-LTR.app/Contents/Resources/certs', 'SSL_CERT_FILE': '/Applications/QGIS-LTR.app/Contents/Resources/certs/certs.pem'}
+env = {'USER': 'liting', 'COMMAND_MODE': 'unix2003', '__CFBundleIdentifier': 'org.qgis.qgis3', 'PATH': '/usr/bin:/bin:/usr/sbin:/sbin', 'LOGNAME': 'liting', 'SSH_AUTH_SOCK': '/private/tmp/com.apple.launchd.zfkvirdFtH/Listeners', 'PYQGIS_STARTUP': 'pyqgis-startup.py', 'HOME': '/Users/liting', 'SHELL': '/bin/zsh', 'TMPDIR': '/var/folders/dx/4fv665g177x973sw3f557wx80000gq/T/', '__CF_USER_TEXT_ENCODING': '0x1F7:0x0:0x0', 'QT_AUTO_SCREEN_SCALE_FACTOR': '1', 'XPC_SERVICE_NAME': 'application.org.qgis.qgis3.2093871.2095212', 'XPC_FLAGS': '0x0', 'QT3D_RENDERER': 'opengl', 'GDAL_DRIVER_PATH': '/Applications/QGIS-LTR.app/Contents/MacOS/lib/gdalplugins', 'GDAL_DATA': '/Applications/QGIS-LTR.app/Contents/Resources/gdal', 'PYTHONHOME': '/Applications/QGIS-LTR.app/Contents/MacOS', 'GDAL_PAM_PROXY_DIR': '/Users/liting/Library/Application Support/QGIS/QGIS3/profiles/default/gdal_pam/', 'GISBASE': '/Applications/QGIS-LTR.app/Contents/MacOS/grass', 'GRASS_PAGER': 'cat', 'LC_CTYPE': 'UTF-8', 'SSL_CERT_DIR': '/Applications/QGIS-LTR.app/Contents/Resources/certs', 'SSL_CERT_FILE': '/Applications/QGIS-LTR.app/Contents/Resources/certs/certs.pem'}
 # todo: change the path
-paths = ['/Applications/QGIS-LTR.app/Contents/MacOS/../Resources/python', '/Users/vivianhuang/Library/Application Support/QGIS/QGIS3/profiles/default/python', '/Users/vivianhuang/Library/Application Support/QGIS/QGIS3/profiles/default/python/plugins', '/Applications/QGIS-LTR.app/Contents/MacOS/../Resources/python/plugins', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/scipy-1.5.1-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/Fiona-1.8.13.post1-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/pyproj-3.2.0-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/Pillow-7.2.0-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/opencv_contrib_python-4.3.0.36-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/statsmodels-0.11.1-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/netCDF4-1.5.4-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/numba-0.50.1-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/lib-dynload', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/matplotlib-3.3.0-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/geopandas-0.8.1-py3.9.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/Rtree-0.9.7-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/cftime-1.2.1-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/rasterio-1.1.5-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python39.zip', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/numpy-1.20.1-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/GDAL-3.3.2-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/patsy-0.5.1-py3.9.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/pandas-1.3.3-py3.9-macosx-10.13.0-x86_64.egg', '/Users/vivianhuang/Library/Application Support/QGIS/QGIS3/profiles/default/python']
-
+paths = ['/Applications/QGIS-LTR.app/Contents/MacOS/../Resources/python', '/Users/liting/Library/Application Support/QGIS/QGIS3/profiles/default/python', '/Users/liting/Library/Application Support/QGIS/QGIS3/profiles/default/python/plugins', '/Applications/QGIS-LTR.app/Contents/MacOS/../Resources/python/plugins', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/Fiona-1.8.13.post1-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/geopandas-0.8.1-py3.9.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/rasterio-1.1.5-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/numpy-1.20.1-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/lib-dynload', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/opencv_contrib_python-4.3.0.36-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/Pillow-7.2.0-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/statsmodels-0.11.1-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/pyproj-3.2.0-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/pandas-1.3.3-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/cftime-1.2.1-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/patsy-0.5.1-py3.9.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/numba-0.50.1-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python39.zip', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/Rtree-0.9.7-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/matplotlib-3.3.0-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/GDAL-3.3.2-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/netCDF4-1.5.4-py3.9-macosx-10.13.0-x86_64.egg', '/Applications/QGIS-LTR.app/Contents/MacOS/lib/python3.9/site-packages/scipy-1.5.1-py3.9-macosx-10.13.0-x86_64.egg', '/Users/liting/Library/Application Support/QGIS/QGIS3/profiles/default/python']
 for k,v in env.items():
     os.environ[k] = v
 
@@ -67,18 +67,19 @@ Presence Cells
 (4) Export the grid as a .csv file to the path save_count_csv_path.
 (5) Remove selection and the attribute 'count' for the Grid Vector.
 """
+presence_points_dir = "/Users/liting/Documents/GitHub/r_chagasM/data/"
+vector_grid_path = "/Users/liting/Documents/GitHub/r_chagasM/grid/grid_005d_process4.shp"
+cell_csv_dir = "/Users/liting/Documents/GitHub/r_chagasM/new_cell/"
 
-presence_points_dir = "/Users/vivianhuang/desktop/R-modeling-scripts/r_chagasM/data/"
-vector_grid_path = "/Users/vivianhuang/desktop/R-modeling-scripts/r_chagasM/grid/grid_005d_process4.shp"
-cell_csv_dir = "/Users/vivianhuang/desktop/R-modeling-scripts/r_chagasM/cell/"
 # This list depends on how you save your species presence points
-sp_rare_name_list = ['San','Rub','Rec','Pro','Neo','Mex','Maz','Lon','Lec','Ind','Ger','Dim']
+sp_rare_name_list = ['san','rub','rec','pro','neo','mex','maz','lon','lec','ind','ger','dim','pal','bar','hir','phy']
 
 
 for this_species_name in sp_rare_name_list:
     csv_file_path = presence_points_dir+this_species_name+'.csv'
+    print(csv_file_path)
 
-    uri = 'file:///%s?crs=%s&delimiter=%s&xField=%s&yField=%s&useHeader=yes' % (csv_file_path, 'EPSG:4326', ',', 'DecimalLon', 'DecimalLat')
+    uri = 'file:///%s?crs=%s&delimiter=%s&xField=%s&yField=%s&useHeader=yes' % (csv_file_path, 'EPSG:4326', ',', 'DecimalLongitude', 'DecimalLatitude')
 
     #Make a vector layer
     sp_layer=QgsVectorLayer(uri,"species","delimitedtext")
@@ -172,16 +173,16 @@ Create Buffer 1 55km, 0.5 degree (b05) for 0.05˚ (5km) grid.
 (5) Export the grid as a .csv file to the path save_count_csv_path.
 (6) Remove selection and the attribute 'save_buffer' for the Grid Vector. Delete the buffer vector from output_buffer_path.
 """
-presence_points_dir = "/Users/vivianhuang/desktop/R-modeling-scripts/r_chagasM/data/"
-vector_grid_path = "/Users/vivianhuang/desktop/R-modeling-scripts/r_chagasM/grid/grid_005d_process4.shp"
-buffer_csv_dir = "/Users/vivianhuang/desktop/R-modeling-scripts/r_chagasM/buffer/"
+presence_points_dir = "/Users/liting/Documents/GitHub/r_chagasM/data/"
+vector_grid_path = "/Users/liting/Documents/GitHub/r_chagasM/grid/grid_005d_process4.shp"
+buffer_csv_dir = "/Users/liting/Documents/GitHub/r_chagasM/new_buffer/"
 buffer_size = 0.5
-sp_rare_name_list = ['San','Rub','Rec','Pro','Neo','Mex','Maz','Lon','Lec','Ind','Ger','Dim']
+sp_rare_name_list = ['san','rub','rec','pro','neo','mex','maz','lon','lec','ind','ger','dim','pal','bar','hir','phy']
 
 for name_this_sp in sp_rare_name_list:
     csv_file_path = presence_points_dir+name_this_sp+'.csv'
 
-    uri = 'file:///%s?crs=%s&delimiter=%s&xField=%s&yField=%s&useHeader=yes' % (csv_file_path, 'EPSG:4326', ',', 'DecimalLon', 'DecimalLat')
+    uri = 'file:///%s?crs=%s&delimiter=%s&xField=%s&yField=%s&useHeader=yes' % (csv_file_path, 'EPSG:4326', ',', 'DecimalLongitude', 'DecimalLatitude')
 
 
     #Make a vector layer

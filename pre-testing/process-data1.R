@@ -1656,7 +1656,7 @@ run_maxent_model_prediction_list <- function(mod_list_path,clim_dir,maxent_raste
 # The Actual Run.                      #
 ########################################
 
-bug_list <- list("San","Ger","Rec","Dim","Ind","Lec","Lon","Maz","Mex","Neo","Pro","Rub")
+bug_list <- list("Ger","Lec","Pal")
 number_replicate <- 10
 top_file_dir <- "/Users/liting/Documents/GitHub/r_chagasM/output/pixel_nobuffer_off"
 input_file_dir <-"/Users/liting/Documents/GitHub/r_chagasM"

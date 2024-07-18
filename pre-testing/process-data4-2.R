@@ -1157,7 +1157,7 @@ run_maxent_kfold_cv_grid_pca <- function(this_bug,number_replicate,top_file_dir,
 
 overall_startTime <- Sys.time()
 
-bug_list = list("Lon","Maz","Mex","Neo","Pro","Rec","Rub")
+bug_list = list('Pal','Bar','Hir','Phy','San','Rub','Rec','Pro','Neo','Mex','Maz','Lon','Lec','Ind','Ger','Dim')
 number_replicate = 10
 
 
@@ -1165,9 +1165,9 @@ number_replicate = 10
 for (this_bug in bug_list){
   top_file_dir = "/Users/liting/Documents/GitHub/r_chagasM/output/grid_buffer_on"#"/Users/liting/Documents/GitHub/r_chagasM/output/kfold_process"
   input_file_dir <-"/Users/liting/Documents/GitHub/r_chagasM"
-  occ_grid_path = paste(input_file_dir,"/cell/",this_bug,".csv",sep = '')
+  occ_grid_path = paste(input_file_dir,"/new_cell/",this_bug,".csv",sep = '')
   clim_grid_path = paste(input_file_dir,"/bioclimatic/historical/5km.csv",sep = '')
-  buffer_grid_path = paste(input_file_dir,"/buffer/",this_bug,".csv",sep = '')
+  buffer_grid_path = paste(input_file_dir,"/new_buffer/",this_bug,".csv",sep = '')
 
   #lc land cover, bc bioclimatic
   grid_path_list <- list("historical_all"=paste(input_file_dir,"/bioclimatic/historical/5km.csv",sep = ''),

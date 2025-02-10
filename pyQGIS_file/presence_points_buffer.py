@@ -69,7 +69,7 @@ Presence Cells
 """
 presence_points_dir = "/Users/liting/Documents/GitHub/r_chagasM/data/"
 vector_grid_path = "/Users/liting/Documents/GitHub/r_chagasM/grid/grid_005d_process4.shp"
-cell_csv_dir = "/Users/liting/Documents/GitHub/r_chagasM/new_cell/"
+cell_csv_dir = "/Users/liting/Documents/GitHub/r_chagasM/cell/"
 
 # This list depends on how you save your species presence points
 sp_rare_name_list = ['san','rub','rec','pro','neo','mex','maz','lon','lec','ind','ger','dim','pal','bar','hir','phy']
@@ -175,9 +175,10 @@ Create Buffer 1 55km, 0.5 degree (b05) for 0.05˚ (5km) grid.
 """
 presence_points_dir = "/Users/liting/Documents/GitHub/r_chagasM/data/"
 vector_grid_path = "/Users/liting/Documents/GitHub/r_chagasM/grid/grid_005d_process4.shp"
-buffer_csv_dir = "/Users/liting/Documents/GitHub/r_chagasM/new_buffer/"
+buffer_csv_dir = "/Users/liting/Documents/GitHub/r_chagasM/buffer/"
 buffer_size = 0.5
-sp_rare_name_list = ['san','rub','rec','pro','neo','mex','maz','lon','lec','ind','ger','dim','pal','bar','hir','phy']
+sp_rare_name_list = ["ger","san","dim","pro","rub","lon","pal","bar","mex","lec","ind","maz","rec","hir"]
+
 
 for name_this_sp in sp_rare_name_list:
     csv_file_path = presence_points_dir+name_this_sp+'.csv'
